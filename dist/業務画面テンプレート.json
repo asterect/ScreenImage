@@ -1,0 +1,4146 @@
+{
+ "app": "gamen-editor",
+ "version": 1,
+ "title": "業務システム画面テンプレート",
+ "size": {
+  "w": 1280,
+  "h": 720
+ },
+ "theme": {
+  "primary": "#2457C5"
+ },
+ "pages": [
+  {
+   "name": "ログイン",
+   "items": [
+    {
+     "id": "t1",
+     "type": "panel",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 720,
+     "props": {
+      "title": "",
+      "fill": "#EEF2F6"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t2",
+     "type": "panel",
+     "x": 420,
+     "y": 120,
+     "w": 440,
+     "h": 470,
+     "props": {
+      "title": "",
+      "fill": "#FFFFFF"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t3",
+     "type": "text",
+     "x": 460,
+     "y": 156,
+     "w": 360,
+     "h": 36,
+     "props": {
+      "text": "顧客管理システム",
+      "size": 22,
+      "bold": true,
+      "align": "center"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t4",
+     "type": "text",
+     "x": 460,
+     "y": 194,
+     "w": 360,
+     "h": 24,
+     "props": {
+      "text": "ユーザーIDとパスワードを入力してください",
+      "size": 13,
+      "color": "#64748B",
+      "align": "center"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t5",
+     "type": "input",
+     "x": 460,
+     "y": 240,
+     "w": 360,
+     "h": 66,
+     "props": {
+      "label": "ユーザーID",
+      "labelPos": "top",
+      "placeholder": "例）U123456"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t6",
+     "type": "input",
+     "x": 460,
+     "y": 322,
+     "w": 360,
+     "h": 66,
+     "props": {
+      "label": "パスワード",
+      "labelPos": "top",
+      "placeholder": "8文字以上"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t7",
+     "type": "checkbox",
+     "x": 460,
+     "y": 400,
+     "w": 360,
+     "h": 28,
+     "props": {
+      "options": "ログイン状態を保持する",
+      "checked": ""
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t8",
+     "type": "button",
+     "x": 460,
+     "y": 444,
+     "w": 360,
+     "h": 44,
+     "props": {
+      "label": "ログイン",
+      "variant": "primary"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t9",
+     "type": "button",
+     "x": 460,
+     "y": 500,
+     "w": 360,
+     "h": 32,
+     "props": {
+      "label": "パスワードをお忘れの方",
+      "variant": "link"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t10",
+     "type": "text",
+     "x": 420,
+     "y": 540,
+     "w": 440,
+     "h": 28,
+     "props": {
+      "text": "初めて利用する方は、システム管理者に利用申請をしてください。",
+      "size": 12,
+      "color": "#64748B",
+      "align": "center"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t11",
+     "type": "text",
+     "x": 0,
+     "y": 672,
+     "w": 1280,
+     "h": 24,
+     "props": {
+      "text": "© 2026 Sample Corporation",
+      "size": 12,
+      "color": "#94A3B8",
+      "align": "center"
+     },
+     "group": "g1"
+    }
+   ]
+  },
+  {
+   "name": "ホーム",
+   "items": [
+    {
+     "id": "t12",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t13",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 1
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t14",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t15",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "ホーム"
+     }
+    },
+    {
+     "id": "t16",
+     "type": "text",
+     "x": 252,
+     "y": 148,
+     "w": 996,
+     "h": 28,
+     "props": {
+      "text": "おはようございます、山田さん。　前回のログイン：2026/10/25 18:42",
+      "size": 13,
+      "color": "#64748B"
+     }
+    },
+    {
+     "id": "t17",
+     "type": "stat",
+     "x": 252,
+     "y": 188,
+     "w": 237,
+     "h": 104,
+     "props": {
+      "label": "未処理の申請",
+      "value": "8",
+      "unit": "件",
+      "note": "本日期限 3 件"
+     }
+    },
+    {
+     "id": "t18",
+     "type": "stat",
+     "x": 505,
+     "y": 188,
+     "w": 237,
+     "h": 104,
+     "props": {
+      "label": "承認待ち",
+      "value": "5",
+      "unit": "件",
+      "note": "うち至急 1 件"
+     }
+    },
+    {
+     "id": "t19",
+     "type": "stat",
+     "x": 758,
+     "y": 188,
+     "w": 237,
+     "h": 104,
+     "props": {
+      "label": "今月の新規顧客",
+      "value": "42",
+      "unit": "件",
+      "note": "前月比 +6 件"
+     }
+    },
+    {
+     "id": "t20",
+     "type": "stat",
+     "x": 1011,
+     "y": 188,
+     "w": 237,
+     "h": 104,
+     "props": {
+      "label": "お知らせ",
+      "value": "2",
+      "unit": "件",
+      "note": "未読あり"
+     }
+    },
+    {
+     "id": "t21",
+     "type": "panel",
+     "x": 252,
+     "y": 312,
+     "w": 600,
+     "h": 376,
+     "props": {
+      "title": "お知らせ"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t22",
+     "type": "table",
+     "x": 268,
+     "y": 368,
+     "w": 568,
+     "h": 216,
+     "props": {
+      "columns": "日付,区分,件名",
+      "widths": "1.3,1,4",
+      "size": 13,
+      "stripe": false,
+      "rows": "2026/10/24\t重要\t11月の定期メンテナンスのお知らせ\n2026/10/20\t連絡\t帳票レイアウトを一部変更しました\n2026/10/15\t連絡\t操作マニュアル（第3版）を公開しました\n2026/10/01\t重要\tパスワードの定期変更のお願い\n2026/09/28\t連絡\t問い合わせ窓口の受付時間変更"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t23",
+     "type": "button",
+     "x": 268,
+     "y": 600,
+     "w": 120,
+     "h": 36,
+     "props": {
+      "label": "すべて見る",
+      "variant": "link"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t24",
+     "type": "panel",
+     "x": 868,
+     "y": 312,
+     "w": 380,
+     "h": 376,
+     "props": {
+      "title": "よく使う機能"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t25",
+     "type": "button",
+     "x": 884,
+     "y": 368,
+     "w": 348,
+     "h": 44,
+     "props": {
+      "label": "顧客を検索する",
+      "variant": "outline"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t26",
+     "type": "button",
+     "x": 884,
+     "y": 424,
+     "w": 348,
+     "h": 44,
+     "props": {
+      "label": "新規顧客を登録する",
+      "variant": "outline"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t27",
+     "type": "button",
+     "x": 884,
+     "y": 480,
+     "w": 348,
+     "h": 44,
+     "props": {
+      "label": "申請を承認する",
+      "variant": "outline"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t28",
+     "type": "button",
+     "x": 884,
+     "y": 536,
+     "w": 348,
+     "h": 44,
+     "props": {
+      "label": "帳票を出力する",
+      "variant": "outline"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t29",
+     "type": "button",
+     "x": 884,
+     "y": 592,
+     "w": 348,
+     "h": 44,
+     "props": {
+      "label": "データを取り込む",
+      "variant": "outline"
+     },
+     "group": "g3"
+    }
+   ]
+  },
+  {
+   "name": "一覧・検索",
+   "items": [
+    {
+     "id": "t30",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t31",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 2
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t32",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,顧客管理,顧客一覧"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t33",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "顧客一覧"
+     }
+    },
+    {
+     "id": "t34",
+     "type": "panel",
+     "x": 252,
+     "y": 156,
+     "w": 996,
+     "h": 216,
+     "props": {
+      "title": "検索条件"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t35",
+     "type": "input",
+     "x": 276,
+     "y": 208,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "顧客番号",
+      "labelWidth": 148,
+      "placeholder": "前方一致"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t36",
+     "type": "input",
+     "x": 756,
+     "y": 208,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "氏名（カナ）",
+      "labelWidth": 148,
+      "placeholder": "例）ヤマダ タロウ"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t37",
+     "type": "select",
+     "x": 276,
+     "y": 260,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "担当店舗",
+      "labelWidth": 148,
+      "placeholder": "すべて"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t38",
+     "type": "date",
+     "x": 756,
+     "y": 260,
+     "w": 296,
+     "h": 40,
+     "props": {
+      "label": "登録日",
+      "labelWidth": 148
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t39",
+     "type": "text",
+     "x": 1052,
+     "y": 260,
+     "w": 32,
+     "h": 40,
+     "props": {
+      "text": "〜",
+      "align": "center"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t40",
+     "type": "date",
+     "x": 1084,
+     "y": 260,
+     "w": 140,
+     "h": 40,
+     "props": {
+      "label": "",
+      "labelWidth": 0
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t41",
+     "type": "button",
+     "x": 1000,
+     "y": 316,
+     "w": 104,
+     "h": 40,
+     "props": {
+      "label": "クリア",
+      "variant": "secondary"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t42",
+     "type": "button",
+     "x": 1116,
+     "y": 316,
+     "w": 108,
+     "h": 40,
+     "props": {
+      "label": "検索",
+      "variant": "primary"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t43",
+     "type": "text",
+     "x": 252,
+     "y": 388,
+     "w": 300,
+     "h": 36,
+     "props": {
+      "text": "検索結果　128 件",
+      "size": 15,
+      "bold": true
+     }
+    },
+    {
+     "id": "t44",
+     "type": "button",
+     "x": 1004,
+     "y": 388,
+     "w": 112,
+     "h": 36,
+     "props": {
+      "label": "CSV出力",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t45",
+     "type": "button",
+     "x": 1128,
+     "y": 388,
+     "w": 120,
+     "h": 36,
+     "props": {
+      "label": "新規登録",
+      "variant": "primary"
+     }
+    },
+    {
+     "id": "t46",
+     "type": "table",
+     "x": 252,
+     "y": 436,
+     "w": 996,
+     "h": 216,
+     "props": {
+      "columns": "顧客番号,氏名,氏名（カナ）,区分,担当者,登録日,状態",
+      "widths": "1.2,1.4,1.6,0.8,1.2,1.2,0.8",
+      "rows": "C-0012345\t山田 太郎\tヤマダ タロウ\t個人\t佐藤 花子\t2024/04/01\t有効\nC-0012388\t株式会社サンプル商事\tカ）サンプルショウジ\t法人\t佐藤 花子\t2024/05/12\t有効\nC-0013021\t鈴木 一郎\tスズキ イチロウ\t個人\t高橋 健\t2024/08/30\t休止\nC-0013457\t高橋 美咲\tタカハシ ミサキ\t個人\t高橋 健\t2025/01/15\t有効\nC-0014002\t有限会社テスト工業\tユ）テストコウギョウ\t法人\t伊藤 由美\t2025/06/03\t有効"
+     }
+    },
+    {
+     "id": "t47",
+     "type": "pagination",
+     "x": 868,
+     "y": 664,
+     "w": 380,
+     "h": 32,
+     "props": {
+      "total": "1〜5 件を表示",
+      "pages": 5,
+      "current": 1
+     }
+    }
+   ]
+  },
+  {
+   "name": "詳細（照会）",
+   "items": [
+    {
+     "id": "t48",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t49",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 2
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t50",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,顧客管理,顧客一覧,顧客詳細"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t51",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 220,
+     "h": 40,
+     "props": {
+      "text": "山田 太郎 様"
+     }
+    },
+    {
+     "id": "t52",
+     "type": "badge",
+     "x": 420,
+     "y": 111,
+     "w": 64,
+     "h": 26,
+     "props": {
+      "text": "有効",
+      "tone": "success"
+     }
+    },
+    {
+     "id": "t53",
+     "type": "button",
+     "x": 1004,
+     "y": 106,
+     "w": 112,
+     "h": 36,
+     "props": {
+      "label": "削除",
+      "variant": "outline",
+      "color": "#DC2626"
+     }
+    },
+    {
+     "id": "t54",
+     "type": "button",
+     "x": 1128,
+     "y": 106,
+     "w": 120,
+     "h": 36,
+     "props": {
+      "label": "編集",
+      "variant": "primary"
+     }
+    },
+    {
+     "id": "t55",
+     "type": "tabs",
+     "x": 252,
+     "y": 156,
+     "w": 996,
+     "h": 44,
+     "props": {
+      "tabs": "基本情報,取引情報,対応履歴,添付書類",
+      "active": 1
+     }
+    },
+    {
+     "id": "t56",
+     "type": "panel",
+     "x": 252,
+     "y": 216,
+     "w": 640,
+     "h": 304,
+     "props": {
+      "title": "基本情報"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t57",
+     "type": "text",
+     "x": 276,
+     "y": 262,
+     "w": 144,
+     "h": 36,
+     "props": {
+      "text": "顧客番号",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t58",
+     "type": "text",
+     "x": 420,
+     "y": 262,
+     "w": 448,
+     "h": 36,
+     "props": {
+      "text": "C-0012345",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t59",
+     "type": "divider",
+     "x": 276,
+     "y": 294,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t60",
+     "type": "text",
+     "x": 276,
+     "y": 298,
+     "w": 144,
+     "h": 36,
+     "props": {
+      "text": "氏名",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t61",
+     "type": "text",
+     "x": 420,
+     "y": 298,
+     "w": 448,
+     "h": 36,
+     "props": {
+      "text": "山田 太郎",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t62",
+     "type": "divider",
+     "x": 276,
+     "y": 330,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t63",
+     "type": "text",
+     "x": 276,
+     "y": 334,
+     "w": 144,
+     "h": 36,
+     "props": {
+      "text": "氏名（カナ）",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t64",
+     "type": "text",
+     "x": 420,
+     "y": 334,
+     "w": 448,
+     "h": 36,
+     "props": {
+      "text": "ヤマダ タロウ",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t65",
+     "type": "divider",
+     "x": 276,
+     "y": 366,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t66",
+     "type": "text",
+     "x": 276,
+     "y": 370,
+     "w": 144,
+     "h": 36,
+     "props": {
+      "text": "生年月日",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t67",
+     "type": "text",
+     "x": 420,
+     "y": 370,
+     "w": 448,
+     "h": 36,
+     "props": {
+      "text": "1985/04/12",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t68",
+     "type": "divider",
+     "x": 276,
+     "y": 402,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t69",
+     "type": "text",
+     "x": 276,
+     "y": 406,
+     "w": 144,
+     "h": 36,
+     "props": {
+      "text": "電話番号",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t70",
+     "type": "text",
+     "x": 420,
+     "y": 406,
+     "w": 448,
+     "h": 36,
+     "props": {
+      "text": "090-1234-5678",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t71",
+     "type": "divider",
+     "x": 276,
+     "y": 438,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t72",
+     "type": "text",
+     "x": 276,
+     "y": 442,
+     "w": 144,
+     "h": 36,
+     "props": {
+      "text": "メールアドレス",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t73",
+     "type": "text",
+     "x": 420,
+     "y": 442,
+     "w": 448,
+     "h": 36,
+     "props": {
+      "text": "taro.yamada@example.com",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t74",
+     "type": "divider",
+     "x": 276,
+     "y": 474,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t75",
+     "type": "text",
+     "x": 276,
+     "y": 478,
+     "w": 144,
+     "h": 36,
+     "props": {
+      "text": "住所",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t76",
+     "type": "text",
+     "x": 420,
+     "y": 478,
+     "w": 448,
+     "h": 36,
+     "props": {
+      "text": "東京都千代田区丸の内1-1-1",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t77",
+     "type": "panel",
+     "x": 908,
+     "y": 216,
+     "w": 340,
+     "h": 304,
+     "props": {
+      "title": "管理情報"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t78",
+     "type": "text",
+     "x": 924,
+     "y": 262,
+     "w": 104,
+     "h": 36,
+     "props": {
+      "text": "担当者",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t79",
+     "type": "text",
+     "x": 1028,
+     "y": 262,
+     "w": 204,
+     "h": 36,
+     "props": {
+      "text": "佐藤 花子",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t80",
+     "type": "divider",
+     "x": 924,
+     "y": 294,
+     "w": 308,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t81",
+     "type": "text",
+     "x": 924,
+     "y": 298,
+     "w": 104,
+     "h": 36,
+     "props": {
+      "text": "担当部署",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t82",
+     "type": "text",
+     "x": 1028,
+     "y": 298,
+     "w": 204,
+     "h": 36,
+     "props": {
+      "text": "営業第一部",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t83",
+     "type": "divider",
+     "x": 924,
+     "y": 330,
+     "w": 308,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t84",
+     "type": "text",
+     "x": 924,
+     "y": 334,
+     "w": 104,
+     "h": 36,
+     "props": {
+      "text": "登録日",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t85",
+     "type": "text",
+     "x": 1028,
+     "y": 334,
+     "w": 204,
+     "h": 36,
+     "props": {
+      "text": "2024/04/01",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t86",
+     "type": "divider",
+     "x": 924,
+     "y": 366,
+     "w": 308,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t87",
+     "type": "text",
+     "x": 924,
+     "y": 370,
+     "w": 104,
+     "h": 36,
+     "props": {
+      "text": "最終更新",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t88",
+     "type": "text",
+     "x": 1028,
+     "y": 370,
+     "w": 204,
+     "h": 36,
+     "props": {
+      "text": "2026/10/20 14:32",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t89",
+     "type": "divider",
+     "x": 924,
+     "y": 402,
+     "w": 308,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t90",
+     "type": "text",
+     "x": 924,
+     "y": 406,
+     "w": 104,
+     "h": 36,
+     "props": {
+      "text": "更新者",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t91",
+     "type": "text",
+     "x": 1028,
+     "y": 406,
+     "w": 204,
+     "h": 36,
+     "props": {
+      "text": "鈴木 一郎",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t92",
+     "type": "panel",
+     "x": 252,
+     "y": 536,
+     "w": 996,
+     "h": 160,
+     "props": {
+      "title": "直近の対応"
+     },
+     "group": "g4"
+    },
+    {
+     "id": "t93",
+     "type": "table",
+     "x": 268,
+     "y": 584,
+     "w": 964,
+     "h": 96,
+     "props": {
+      "columns": "日時,区分,内容,担当者",
+      "widths": "1.4,0.8,5,1",
+      "size": 12,
+      "stripe": false,
+      "rows": "2026/10/20 14:32\t変更\t電話番号を変更（本人より電話で申出）\t鈴木 一郎\n2026/09/02 10:15\t相談\t住所変更の手続きについて問い合わせ\t佐藤 花子\n2026/07/18 16:40\t訪問\t定期訪問。ご家族の状況をヒアリング\t佐藤 花子"
+     },
+     "group": "g4"
+    }
+   ]
+  },
+  {
+   "name": "登録（入力）",
+   "items": [
+    {
+     "id": "t94",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t95",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 2
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t96",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,顧客管理,顧客登録"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t97",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "顧客登録"
+     }
+    },
+    {
+     "id": "t98",
+     "type": "steps",
+     "x": 768,
+     "y": 96,
+     "w": 480,
+     "h": 56,
+     "props": {
+      "steps": "入力,確認,完了",
+      "current": 1
+     }
+    },
+    {
+     "id": "t99",
+     "type": "panel",
+     "x": 252,
+     "y": 164,
+     "w": 996,
+     "h": 208,
+     "props": {
+      "title": "基本情報"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t100",
+     "type": "input",
+     "x": 276,
+     "y": 216,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "氏名",
+      "labelWidth": 148,
+      "required": true,
+      "placeholder": "例）山田 太郎",
+      "value": ""
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t101",
+     "type": "input",
+     "x": 756,
+     "y": 216,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "氏名（カナ）",
+      "labelWidth": 148,
+      "required": true,
+      "placeholder": "例）ヤマダ タロウ",
+      "value": ""
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t102",
+     "type": "date",
+     "x": 276,
+     "y": 268,
+     "w": 340,
+     "h": 40,
+     "props": {
+      "label": "生年月日",
+      "labelWidth": 148,
+      "value": ""
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t103",
+     "type": "text",
+     "x": 756,
+     "y": 272,
+     "w": 148,
+     "h": 32,
+     "props": {
+      "text": "性別",
+      "bold": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t104",
+     "type": "radio",
+     "x": 904,
+     "y": 272,
+     "w": 340,
+     "h": 32,
+     "props": {
+      "options": "男性,女性,回答しない",
+      "selected": 0
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t105",
+     "type": "input",
+     "x": 276,
+     "y": 320,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "電話番号",
+      "labelWidth": 148,
+      "required": true,
+      "placeholder": "例）090-1234-5678",
+      "value": ""
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t106",
+     "type": "input",
+     "x": 756,
+     "y": 320,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "メールアドレス",
+      "labelWidth": 148,
+      "placeholder": "例）taro@example.com",
+      "value": ""
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t107",
+     "type": "panel",
+     "x": 252,
+     "y": 388,
+     "w": 996,
+     "h": 248,
+     "props": {
+      "title": "住所・その他"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t108",
+     "type": "input",
+     "x": 276,
+     "y": 440,
+     "w": 300,
+     "h": 40,
+     "props": {
+      "label": "郵便番号",
+      "labelWidth": 148,
+      "placeholder": "例）100-0005"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t109",
+     "type": "button",
+     "x": 588,
+     "y": 440,
+     "w": 108,
+     "h": 40,
+     "props": {
+      "label": "住所を検索",
+      "variant": "secondary"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t110",
+     "type": "input",
+     "x": 276,
+     "y": 492,
+     "w": 948,
+     "h": 40,
+     "props": {
+      "label": "住所",
+      "labelWidth": 148,
+      "placeholder": "都道府県・市区町村・番地・建物名"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t111",
+     "type": "textarea",
+     "x": 276,
+     "y": 544,
+     "w": 948,
+     "h": 72,
+     "props": {
+      "label": "備考",
+      "labelWidth": 148,
+      "placeholder": "自由に入力できます（500文字まで）"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t112",
+     "type": "button",
+     "x": 252,
+     "y": 656,
+     "w": 120,
+     "h": 40,
+     "props": {
+      "label": "キャンセル",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t113",
+     "type": "button",
+     "x": 1104,
+     "y": 656,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "label": "確認へ進む",
+      "variant": "primary"
+     }
+    }
+   ]
+  },
+  {
+   "name": "登録確認",
+   "items": [
+    {
+     "id": "t114",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t115",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 2
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t116",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,顧客管理,顧客登録"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t117",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "顧客登録"
+     }
+    },
+    {
+     "id": "t118",
+     "type": "steps",
+     "x": 768,
+     "y": 96,
+     "w": 480,
+     "h": 56,
+     "props": {
+      "steps": "入力,確認,完了",
+      "current": 2
+     }
+    },
+    {
+     "id": "t119",
+     "type": "alert",
+     "x": 252,
+     "y": 164,
+     "w": 996,
+     "h": 44,
+     "props": {
+      "text": "入力内容を確認し、よろしければ「登録する」を押してください。",
+      "tone": "info"
+     }
+    },
+    {
+     "id": "t120",
+     "type": "panel",
+     "x": 252,
+     "y": 224,
+     "w": 996,
+     "h": 384,
+     "props": {
+      "title": "入力内容の確認"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t121",
+     "type": "text",
+     "x": 276,
+     "y": 270,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "氏名",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t122",
+     "type": "text",
+     "x": 456,
+     "y": 270,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "山田 太郎",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t123",
+     "type": "divider",
+     "x": 276,
+     "y": 302,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t124",
+     "type": "text",
+     "x": 276,
+     "y": 306,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "氏名（カナ）",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t125",
+     "type": "text",
+     "x": 456,
+     "y": 306,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "ヤマダ タロウ",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t126",
+     "type": "divider",
+     "x": 276,
+     "y": 338,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t127",
+     "type": "text",
+     "x": 276,
+     "y": 342,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "生年月日",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t128",
+     "type": "text",
+     "x": 456,
+     "y": 342,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "1985/04/12",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t129",
+     "type": "divider",
+     "x": 276,
+     "y": 374,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t130",
+     "type": "text",
+     "x": 276,
+     "y": 378,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "性別",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t131",
+     "type": "text",
+     "x": 456,
+     "y": 378,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "男性",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t132",
+     "type": "divider",
+     "x": 276,
+     "y": 410,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t133",
+     "type": "text",
+     "x": 276,
+     "y": 414,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "電話番号",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t134",
+     "type": "text",
+     "x": 456,
+     "y": 414,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "090-1234-5678",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t135",
+     "type": "divider",
+     "x": 276,
+     "y": 446,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t136",
+     "type": "text",
+     "x": 276,
+     "y": 450,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "メールアドレス",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t137",
+     "type": "text",
+     "x": 456,
+     "y": 450,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "taro.yamada@example.com",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t138",
+     "type": "divider",
+     "x": 276,
+     "y": 482,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t139",
+     "type": "text",
+     "x": 276,
+     "y": 486,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "郵便番号",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t140",
+     "type": "text",
+     "x": 456,
+     "y": 486,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "100-0005",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t141",
+     "type": "divider",
+     "x": 276,
+     "y": 518,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t142",
+     "type": "text",
+     "x": 276,
+     "y": 522,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "住所",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t143",
+     "type": "text",
+     "x": 456,
+     "y": 522,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "東京都千代田区丸の内1-1-1",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t144",
+     "type": "divider",
+     "x": 276,
+     "y": 554,
+     "w": 948,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t145",
+     "type": "text",
+     "x": 276,
+     "y": 558,
+     "w": 180,
+     "h": 36,
+     "props": {
+      "text": "備考",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t146",
+     "type": "text",
+     "x": 456,
+     "y": 558,
+     "w": 768,
+     "h": 36,
+     "props": {
+      "text": "（なし）",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t147",
+     "type": "button",
+     "x": 252,
+     "y": 640,
+     "w": 160,
+     "h": 40,
+     "props": {
+      "label": "入力画面に戻る",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t148",
+     "type": "button",
+     "x": 1104,
+     "y": 640,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "label": "登録する",
+      "variant": "primary"
+     }
+    }
+   ]
+  },
+  {
+   "name": "登録完了",
+   "items": [
+    {
+     "id": "t149",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t150",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 2
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t151",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,顧客管理,顧客登録"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t152",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "顧客登録"
+     }
+    },
+    {
+     "id": "t153",
+     "type": "steps",
+     "x": 768,
+     "y": 96,
+     "w": 480,
+     "h": 56,
+     "props": {
+      "steps": "入力,確認,完了",
+      "current": 3
+     }
+    },
+    {
+     "id": "t154",
+     "type": "marker",
+     "x": 714,
+     "y": 224,
+     "w": 72,
+     "h": 72,
+     "props": {
+      "number": "✓",
+      "color": "#16A34A"
+     }
+    },
+    {
+     "id": "t155",
+     "type": "text",
+     "x": 252,
+     "y": 316,
+     "w": 996,
+     "h": 40,
+     "props": {
+      "text": "登録が完了しました",
+      "size": 22,
+      "bold": true,
+      "align": "center"
+     }
+    },
+    {
+     "id": "t156",
+     "type": "text",
+     "x": 252,
+     "y": 360,
+     "w": 996,
+     "h": 28,
+     "props": {
+      "text": "顧客番号「C-0012399」で登録しました。",
+      "size": 14,
+      "color": "#475569",
+      "align": "center"
+     }
+    },
+    {
+     "id": "t157",
+     "type": "button",
+     "x": 582,
+     "y": 420,
+     "w": 160,
+     "h": 40,
+     "props": {
+      "label": "続けて登録する",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t158",
+     "type": "button",
+     "x": 758,
+     "y": 420,
+     "w": 160,
+     "h": 40,
+     "props": {
+      "label": "詳細を表示する",
+      "variant": "primary"
+     }
+    },
+    {
+     "id": "t159",
+     "type": "button",
+     "x": 670,
+     "y": 476,
+     "w": 160,
+     "h": 32,
+     "props": {
+      "label": "一覧に戻る",
+      "variant": "link"
+     }
+    }
+   ]
+  },
+  {
+   "name": "編集",
+   "items": [
+    {
+     "id": "t160",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t161",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 2
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t162",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,顧客管理,顧客一覧,顧客詳細,編集"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t163",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "顧客情報の編集"
+     }
+    },
+    {
+     "id": "t164",
+     "type": "text",
+     "x": 848,
+     "y": 108,
+     "w": 400,
+     "h": 32,
+     "props": {
+      "text": "最終更新：2026/10/20 14:32　鈴木 一郎",
+      "size": 13,
+      "color": "#64748B",
+      "align": "right"
+     }
+    },
+    {
+     "id": "t165",
+     "type": "panel",
+     "x": 252,
+     "y": 164,
+     "w": 996,
+     "h": 208,
+     "props": {
+      "title": "基本情報"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t166",
+     "type": "input",
+     "x": 276,
+     "y": 216,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "顧客番号",
+      "labelWidth": 148,
+      "value": "C-0012345",
+      "disabled": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t167",
+     "type": "select",
+     "x": 756,
+     "y": 216,
+     "w": 300,
+     "h": 40,
+     "props": {
+      "label": "状態",
+      "labelWidth": 148,
+      "value": "有効"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t168",
+     "type": "input",
+     "x": 276,
+     "y": 268,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "氏名",
+      "labelWidth": 148,
+      "required": true,
+      "value": "山田 太郎"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t169",
+     "type": "input",
+     "x": 756,
+     "y": 268,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "氏名（カナ）",
+      "labelWidth": 148,
+      "required": true,
+      "value": "ヤマダ タロウ"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t170",
+     "type": "date",
+     "x": 276,
+     "y": 320,
+     "w": 340,
+     "h": 40,
+     "props": {
+      "label": "生年月日",
+      "labelWidth": 148,
+      "value": "1985/04/12"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t171",
+     "type": "input",
+     "x": 756,
+     "y": 320,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "電話番号",
+      "labelWidth": 148,
+      "required": true,
+      "value": "090-1234-5678"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t172",
+     "type": "panel",
+     "x": 252,
+     "y": 388,
+     "w": 996,
+     "h": 248,
+     "props": {
+      "title": "連絡先・変更理由"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t173",
+     "type": "input",
+     "x": 276,
+     "y": 440,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "メールアドレス",
+      "labelWidth": 148,
+      "value": "taro.yamada@example.com"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t174",
+     "type": "input",
+     "x": 276,
+     "y": 492,
+     "w": 948,
+     "h": 40,
+     "props": {
+      "label": "住所",
+      "labelWidth": 148,
+      "value": "東京都千代田区丸の内1-1-1"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t175",
+     "type": "textarea",
+     "x": 276,
+     "y": 544,
+     "w": 948,
+     "h": 72,
+     "props": {
+      "label": "変更理由",
+      "labelWidth": 148,
+      "required": true,
+      "placeholder": "例）本人より電話番号変更の申出"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t176",
+     "type": "button",
+     "x": 252,
+     "y": 656,
+     "w": 120,
+     "h": 40,
+     "props": {
+      "label": "キャンセル",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t177",
+     "type": "button",
+     "x": 1104,
+     "y": 656,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "label": "更新する",
+      "variant": "primary"
+     }
+    }
+   ]
+  },
+  {
+   "name": "入力エラー",
+   "items": [
+    {
+     "id": "t178",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t179",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 2
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t180",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,顧客管理,顧客登録"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t181",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "顧客登録"
+     }
+    },
+    {
+     "id": "t182",
+     "type": "steps",
+     "x": 768,
+     "y": 96,
+     "w": 480,
+     "h": 56,
+     "props": {
+      "steps": "入力,確認,完了",
+      "current": 1
+     }
+    },
+    {
+     "id": "t183",
+     "type": "alert",
+     "x": 252,
+     "y": 164,
+     "w": 996,
+     "h": 44,
+     "props": {
+      "text": "入力内容に誤りが 3 件あります。赤枠の項目を確認してください。",
+      "tone": "danger"
+     }
+    },
+    {
+     "id": "t184",
+     "type": "panel",
+     "x": 252,
+     "y": 224,
+     "w": 996,
+     "h": 236,
+     "props": {
+      "title": "基本情報"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t185",
+     "type": "input",
+     "x": 276,
+     "y": 276,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "氏名",
+      "labelWidth": 148,
+      "required": true,
+      "value": "山田 太郎"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t186",
+     "type": "input",
+     "x": 756,
+     "y": 276,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "氏名（カナ）",
+      "labelWidth": 148,
+      "required": true,
+      "placeholder": "例）ヤマダ タロウ"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t187",
+     "type": "focus",
+     "x": 902,
+     "y": 274,
+     "w": 324,
+     "h": 44,
+     "props": {
+      "color": "#DC2626",
+      "width": 2,
+      "dash": false
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t188",
+     "type": "text",
+     "x": 904,
+     "y": 320,
+     "w": 320,
+     "h": 18,
+     "props": {
+      "text": "氏名（カナ）を入力してください。",
+      "size": 12,
+      "color": "#DC2626",
+      "fit": "ellipsis"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t189",
+     "type": "date",
+     "x": 276,
+     "y": 340,
+     "w": 340,
+     "h": 40,
+     "props": {
+      "label": "生年月日",
+      "labelWidth": 148,
+      "value": "1985/13/40"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t190",
+     "type": "focus",
+     "x": 422,
+     "y": 338,
+     "w": 196,
+     "h": 44,
+     "props": {
+      "color": "#DC2626",
+      "width": 2,
+      "dash": false
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t191",
+     "type": "text",
+     "x": 424,
+     "y": 384,
+     "w": 192,
+     "h": 18,
+     "props": {
+      "text": "正しい日付を入力してください。",
+      "size": 12,
+      "color": "#DC2626",
+      "fit": "ellipsis"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t192",
+     "type": "text",
+     "x": 756,
+     "y": 344,
+     "w": 148,
+     "h": 32,
+     "props": {
+      "text": "性別",
+      "bold": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t193",
+     "type": "radio",
+     "x": 904,
+     "y": 344,
+     "w": 340,
+     "h": 32,
+     "props": {
+      "options": "男性,女性,回答しない",
+      "selected": 1
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t194",
+     "type": "input",
+     "x": 276,
+     "y": 404,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "電話番号",
+      "labelWidth": 148,
+      "required": true,
+      "value": "090-1234"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t195",
+     "type": "focus",
+     "x": 422,
+     "y": 402,
+     "w": 308,
+     "h": 44,
+     "props": {
+      "color": "#DC2626",
+      "width": 2,
+      "dash": false
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t196",
+     "type": "text",
+     "x": 424,
+     "y": 448,
+     "w": 304,
+     "h": 18,
+     "props": {
+      "text": "電話番号の桁数が足りません。",
+      "size": 12,
+      "color": "#DC2626",
+      "fit": "ellipsis"
+     }
+    },
+    {
+     "id": "t197",
+     "type": "input",
+     "x": 756,
+     "y": 404,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "メールアドレス",
+      "labelWidth": 148,
+      "value": "taro.yamada@example.com"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t198",
+     "type": "button",
+     "x": 252,
+     "y": 484,
+     "w": 120,
+     "h": 40,
+     "props": {
+      "label": "キャンセル",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t199",
+     "type": "button",
+     "x": 1104,
+     "y": 484,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "label": "確認へ進む",
+      "variant": "primary"
+     }
+    },
+    {
+     "id": "t200",
+     "type": "sticky",
+     "x": 252,
+     "y": 556,
+     "w": 360,
+     "h": 120,
+     "props": {
+      "title": "入力チェックの表示ルール",
+      "text": "・エラーの項目は赤枠で囲み、すぐ下に理由を表示する\n・画面上部にエラーの件数を表示する\n・最初のエラー項目にカーソルを移す"
+     }
+    }
+   ]
+  },
+  {
+   "name": "削除確認（ダイアログ）",
+   "items": [
+    {
+     "id": "t201",
+     "type": "panel",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 720,
+     "props": {
+      "title": "",
+      "fill": "#64748B"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t202",
+     "type": "dialog",
+     "x": 400,
+     "y": 220,
+     "w": 480,
+     "h": 240,
+     "props": {
+      "title": "顧客の削除",
+      "buttons": "キャンセル,削除する",
+      "color": "#DC2626",
+      "message": "顧客「山田 太郎（C-0012345）」を削除します。\n削除すると元に戻せません。よろしいですか？"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t203",
+     "type": "sticky",
+     "x": 920,
+     "y": 220,
+     "w": 280,
+     "h": 112,
+     "props": {
+      "title": "補足",
+      "text": "詳細画面の「削除」から開く。\n背景の画面は操作できない状態にする。"
+     },
+     "group": "g1"
+    }
+   ]
+  },
+  {
+   "name": "申請一覧（承認待ち）",
+   "items": [
+    {
+     "id": "t204",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t205",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 3
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t206",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,申請・承認,申請一覧"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t207",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "申請一覧"
+     }
+    },
+    {
+     "id": "t208",
+     "type": "tabs",
+     "x": 252,
+     "y": 156,
+     "w": 996,
+     "h": 44,
+     "props": {
+      "tabs": "承認待ち（5）,承認済み,差戻し,すべて",
+      "active": 1
+     }
+    },
+    {
+     "id": "t209",
+     "type": "search",
+     "x": 928,
+     "y": 216,
+     "w": 320,
+     "h": 36,
+     "props": {
+      "placeholder": "申請番号・申請者で検索"
+     }
+    },
+    {
+     "id": "t210",
+     "type": "text",
+     "x": 252,
+     "y": 216,
+     "w": 400,
+     "h": 36,
+     "props": {
+      "text": "承認が必要な申請が 5 件あります",
+      "size": 14,
+      "color": "#475569"
+     }
+    },
+    {
+     "id": "t211",
+     "type": "table",
+     "x": 252,
+     "y": 268,
+     "w": 996,
+     "h": 216,
+     "props": {
+      "columns": "申請番号,申請日,申請種別,申請者,金額,期限,状態",
+      "widths": "1.2,1.1,1.6,1.1,1.1,1.1,0.9",
+      "rows": "R-2026-0142\t2026/10/24\t経費精算\t高橋 健\t48,200\t10/28\t至急\nR-2026-0139\t2026/10/23\t出張申請\t伊藤 由美\t126,000\t10/30\t承認待ち\nR-2026-0137\t2026/10/22\t備品購入\t佐藤 花子\t23,800\t11/05\t承認待ち\nR-2026-0135\t2026/10/21\t経費精算\t田中 健\t9,640\t11/05\t承認待ち\nR-2026-0131\t2026/10/20\t休暇申請\t鈴木 一郎\t—\t10/27\t承認待ち"
+     }
+    },
+    {
+     "id": "t212",
+     "type": "pagination",
+     "x": 868,
+     "y": 500,
+     "w": 380,
+     "h": 32,
+     "props": {
+      "total": "全 5 件",
+      "pages": 1,
+      "current": 1
+     }
+    },
+    {
+     "id": "t213",
+     "type": "alert",
+     "x": 252,
+     "y": 556,
+     "w": 996,
+     "h": 44,
+     "props": {
+      "text": "期限を過ぎた申請は、自動的に上長の上長へ回送されます。",
+      "tone": "neutral"
+     }
+    }
+   ]
+  },
+  {
+   "name": "申請詳細（承認）",
+   "items": [
+    {
+     "id": "t214",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t215",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 3
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t216",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,申請・承認,申請一覧,申請詳細"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t217",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 360,
+     "h": 40,
+     "props": {
+      "text": "経費精算　R-2026-0142"
+     }
+    },
+    {
+     "id": "t218",
+     "type": "badge",
+     "x": 620,
+     "y": 111,
+     "w": 64,
+     "h": 26,
+     "props": {
+      "text": "至急",
+      "tone": "danger"
+     }
+    },
+    {
+     "id": "t219",
+     "type": "panel",
+     "x": 252,
+     "y": 156,
+     "w": 640,
+     "h": 340,
+     "props": {
+      "title": "申請内容"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t220",
+     "type": "text",
+     "x": 276,
+     "y": 202,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "text": "申請者",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t221",
+     "type": "text",
+     "x": 420,
+     "y": 202,
+     "w": 448,
+     "h": 40,
+     "props": {
+      "text": "高橋 健（営業第二部）",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t222",
+     "type": "divider",
+     "x": 276,
+     "y": 238,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t223",
+     "type": "text",
+     "x": 276,
+     "y": 242,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "text": "申請日",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t224",
+     "type": "text",
+     "x": 420,
+     "y": 242,
+     "w": 448,
+     "h": 40,
+     "props": {
+      "text": "2026/10/24",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t225",
+     "type": "divider",
+     "x": 276,
+     "y": 278,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t226",
+     "type": "text",
+     "x": 276,
+     "y": 282,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "text": "件名",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t227",
+     "type": "text",
+     "x": 420,
+     "y": 282,
+     "w": 448,
+     "h": 40,
+     "props": {
+      "text": "顧客訪問の交通費・会議費",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t228",
+     "type": "divider",
+     "x": 276,
+     "y": 318,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t229",
+     "type": "text",
+     "x": 276,
+     "y": 322,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "text": "金額",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t230",
+     "type": "text",
+     "x": 420,
+     "y": 322,
+     "w": 448,
+     "h": 40,
+     "props": {
+      "text": "48,200 円",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t231",
+     "type": "divider",
+     "x": 276,
+     "y": 358,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t232",
+     "type": "text",
+     "x": 276,
+     "y": 362,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "text": "支払先",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t233",
+     "type": "text",
+     "x": 420,
+     "y": 362,
+     "w": 448,
+     "h": 40,
+     "props": {
+      "text": "本人口座",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t234",
+     "type": "divider",
+     "x": 276,
+     "y": 398,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t235",
+     "type": "text",
+     "x": 276,
+     "y": 402,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "text": "添付書類",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t236",
+     "type": "text",
+     "x": 420,
+     "y": 402,
+     "w": 448,
+     "h": 40,
+     "props": {
+      "text": "領収書 3 件（PDF）",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t237",
+     "type": "divider",
+     "x": 276,
+     "y": 438,
+     "w": 592,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t238",
+     "type": "text",
+     "x": 276,
+     "y": 442,
+     "w": 144,
+     "h": 40,
+     "props": {
+      "text": "申請理由",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t239",
+     "type": "text",
+     "x": 420,
+     "y": 442,
+     "w": 448,
+     "h": 40,
+     "props": {
+      "text": "10月の顧客訪問（3社）に伴う交通費と会議費",
+      "size": 14
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t240",
+     "type": "panel",
+     "x": 908,
+     "y": 156,
+     "w": 340,
+     "h": 340,
+     "props": {
+      "title": "承認の流れ"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t241",
+     "type": "text",
+     "x": 924,
+     "y": 202,
+     "w": 108,
+     "h": 40,
+     "props": {
+      "text": "申請",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t242",
+     "type": "text",
+     "x": 1032,
+     "y": 202,
+     "w": 200,
+     "h": 40,
+     "props": {
+      "text": "高橋 健　10/24",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t243",
+     "type": "divider",
+     "x": 924,
+     "y": 238,
+     "w": 308,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t244",
+     "type": "text",
+     "x": 924,
+     "y": 242,
+     "w": 108,
+     "h": 40,
+     "props": {
+      "text": "課長",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t245",
+     "type": "text",
+     "x": 1032,
+     "y": 242,
+     "w": 200,
+     "h": 40,
+     "props": {
+      "text": "山田 太郎　未承認",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t246",
+     "type": "divider",
+     "x": 924,
+     "y": 278,
+     "w": 308,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t247",
+     "type": "text",
+     "x": 924,
+     "y": 282,
+     "w": 108,
+     "h": 40,
+     "props": {
+      "text": "部長",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t248",
+     "type": "text",
+     "x": 1032,
+     "y": 282,
+     "w": 200,
+     "h": 40,
+     "props": {
+      "text": "—",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t249",
+     "type": "divider",
+     "x": 924,
+     "y": 318,
+     "w": 308,
+     "h": 8,
+     "props": {
+      "color": "#E2E8F0"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t250",
+     "type": "text",
+     "x": 924,
+     "y": 322,
+     "w": 108,
+     "h": 40,
+     "props": {
+      "text": "経理",
+      "bold": true,
+      "size": 14,
+      "color": "#475569"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t251",
+     "type": "text",
+     "x": 1032,
+     "y": 322,
+     "w": 200,
+     "h": 40,
+     "props": {
+      "text": "—",
+      "size": 14
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t252",
+     "type": "textarea",
+     "x": 252,
+     "y": 512,
+     "w": 996,
+     "h": 104,
+     "props": {
+      "label": "コメント",
+      "labelPos": "top",
+      "placeholder": "差し戻す場合は理由を入力してください"
+     }
+    },
+    {
+     "id": "t253",
+     "type": "button",
+     "x": 252,
+     "y": 640,
+     "w": 120,
+     "h": 40,
+     "props": {
+      "label": "一覧に戻る",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t254",
+     "type": "button",
+     "x": 980,
+     "y": 640,
+     "w": 120,
+     "h": 40,
+     "props": {
+      "label": "差し戻す",
+      "variant": "outline",
+      "color": "#DC2626"
+     }
+    },
+    {
+     "id": "t255",
+     "type": "button",
+     "x": 1112,
+     "y": 640,
+     "w": 136,
+     "h": 40,
+     "props": {
+      "label": "承認する",
+      "variant": "primary"
+     }
+    }
+   ]
+  },
+  {
+   "name": "マスタ管理",
+   "items": [
+    {
+     "id": "t256",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t257",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 6
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t258",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,マスタ管理,店舗マスタ"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t259",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "店舗マスタ"
+     }
+    },
+    {
+     "id": "t260",
+     "type": "search",
+     "x": 252,
+     "y": 156,
+     "w": 320,
+     "h": 36,
+     "props": {
+      "placeholder": "コード・名称で検索"
+     }
+    },
+    {
+     "id": "t261",
+     "type": "button",
+     "x": 732,
+     "y": 156,
+     "w": 120,
+     "h": 36,
+     "props": {
+      "label": "＋ 新規追加",
+      "variant": "outline"
+     }
+    },
+    {
+     "id": "t262",
+     "type": "table",
+     "x": 252,
+     "y": 208,
+     "w": 600,
+     "h": 432,
+     "props": {
+      "columns": "コード,店舗名,表示順,状態",
+      "widths": "1,2.6,1,1",
+      "rows": "001\t本店\t1\t有効\n002\t駅前支店\t2\t有効\n003\t北町支店\t3\t有効\n004\t南町支店\t4\t有効\n005\t東口出張所\t5\t停止\n006\t西が丘支店\t6\t有効\n007\t港支店\t7\t有効\n008\t中央通り支店\t8\t有効\n009\t旧本店（統合済）\t99\t停止\n010\t新町支店\t10\t有効\n011\t桜台支店\t11\t有効"
+     }
+    },
+    {
+     "id": "t263",
+     "type": "pagination",
+     "x": 472,
+     "y": 656,
+     "w": 380,
+     "h": 32,
+     "props": {
+      "total": "全 24 件",
+      "pages": 3,
+      "current": 1
+     }
+    },
+    {
+     "id": "t264",
+     "type": "panel",
+     "x": 868,
+     "y": 156,
+     "w": 380,
+     "h": 532,
+     "props": {
+      "title": "店舗情報の編集"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t265",
+     "type": "input",
+     "x": 892,
+     "y": 212,
+     "w": 332,
+     "h": 66,
+     "props": {
+      "label": "コード",
+      "labelPos": "top",
+      "value": "002",
+      "disabled": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t266",
+     "type": "input",
+     "x": 892,
+     "y": 294,
+     "w": 332,
+     "h": 66,
+     "props": {
+      "label": "店舗名",
+      "labelPos": "top",
+      "required": true,
+      "value": "駅前支店"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t267",
+     "type": "input",
+     "x": 892,
+     "y": 376,
+     "w": 160,
+     "h": 66,
+     "props": {
+      "label": "表示順",
+      "labelPos": "top",
+      "value": "2"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t268",
+     "type": "input",
+     "x": 892,
+     "y": 458,
+     "w": 332,
+     "h": 66,
+     "props": {
+      "label": "電話番号",
+      "labelPos": "top",
+      "value": "03-1234-5678"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t269",
+     "type": "toggle",
+     "x": 892,
+     "y": 544,
+     "w": 332,
+     "h": 32,
+     "props": {
+      "label": "この店舗を有効にする",
+      "on": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t270",
+     "type": "button",
+     "x": 892,
+     "y": 624,
+     "w": 156,
+     "h": 40,
+     "props": {
+      "label": "キャンセル",
+      "variant": "secondary"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t271",
+     "type": "button",
+     "x": 1068,
+     "y": 624,
+     "w": 156,
+     "h": 40,
+     "props": {
+      "label": "保存",
+      "variant": "primary"
+     },
+     "group": "g2"
+    }
+   ]
+  },
+  {
+   "name": "帳票出力",
+   "items": [
+    {
+     "id": "t272",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t273",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 4
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t274",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,帳票出力"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t275",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "帳票出力"
+     }
+    },
+    {
+     "id": "t276",
+     "type": "panel",
+     "x": 252,
+     "y": 156,
+     "w": 996,
+     "h": 268,
+     "props": {
+      "title": "出力条件"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t277",
+     "type": "select",
+     "x": 276,
+     "y": 208,
+     "w": 452,
+     "h": 40,
+     "props": {
+      "label": "帳票の種類",
+      "labelWidth": 148,
+      "required": true,
+      "value": "顧客別取引明細"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t278",
+     "type": "select",
+     "x": 756,
+     "y": 208,
+     "w": 468,
+     "h": 40,
+     "props": {
+      "label": "店舗",
+      "labelWidth": 148,
+      "placeholder": "すべて"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t279",
+     "type": "date",
+     "x": 276,
+     "y": 260,
+     "w": 296,
+     "h": 40,
+     "props": {
+      "label": "対象期間",
+      "labelWidth": 148,
+      "value": "2026/10/01"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t280",
+     "type": "text",
+     "x": 572,
+     "y": 260,
+     "w": 32,
+     "h": 40,
+     "props": {
+      "text": "〜",
+      "align": "center"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t281",
+     "type": "date",
+     "x": 604,
+     "y": 260,
+     "w": 140,
+     "h": 40,
+     "props": {
+      "label": "",
+      "labelWidth": 0,
+      "value": "2026/10/31"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t282",
+     "type": "text",
+     "x": 276,
+     "y": 316,
+     "w": 148,
+     "h": 32,
+     "props": {
+      "text": "出力形式",
+      "bold": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t283",
+     "type": "radio",
+     "x": 424,
+     "y": 316,
+     "w": 320,
+     "h": 32,
+     "props": {
+      "options": "PDF,Excel,CSV",
+      "selected": 1
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t284",
+     "type": "checkbox",
+     "x": 756,
+     "y": 316,
+     "w": 468,
+     "h": 32,
+     "props": {
+      "options": "0件の項目も出力する",
+      "checked": ""
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t285",
+     "type": "button",
+     "x": 1104,
+     "y": 368,
+     "w": 120,
+     "h": 40,
+     "props": {
+      "label": "出力する",
+      "variant": "primary"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t286",
+     "type": "panel",
+     "x": 252,
+     "y": 440,
+     "w": 996,
+     "h": 248,
+     "props": {
+      "title": "出力履歴（直近7日間）"
+     },
+     "group": "g3"
+    },
+    {
+     "id": "t287",
+     "type": "table",
+     "x": 268,
+     "y": 488,
+     "w": 964,
+     "h": 180,
+     "props": {
+      "columns": "出力日時,帳票名,条件,形式,状態",
+      "widths": "1.3,1.6,2.6,0.7,1",
+      "rows": "2026/10/25 18:20\t顧客別取引明細\t2026/10/01〜10/24・全店舗\tPDF\t完了\n2026/10/25 09:05\t新規顧客一覧\t2026/10 月分・本店\tExcel\t完了\n2026/10/23 17:48\t担当者別実績表\t2026/09 月分・全店舗\tPDF\t期限切れ\n2026/10/22 11:30\t顧客別取引明細\t2026/09/01〜09/30・駅前支店\tCSV\t作成中…"
+     },
+     "group": "g3"
+    }
+   ]
+  },
+  {
+   "name": "ファイル取込",
+   "items": [
+    {
+     "id": "t288",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "営業第一部　山田 太郎"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t289",
+     "type": "sidemenu",
+     "x": 0,
+     "y": 56,
+     "w": 220,
+     "h": 664,
+     "props": {
+      "items": "ホーム\n顧客管理\n申請・承認\n帳票出力\nデータ取込\nマスタ管理\nシステム設定",
+      "active": 5
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t290",
+     "type": "breadcrumb",
+     "x": 252,
+     "y": 76,
+     "w": 640,
+     "h": 24,
+     "props": {
+      "items": "ホーム,データ取込"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t291",
+     "type": "heading",
+     "x": 252,
+     "y": 104,
+     "w": 480,
+     "h": 40,
+     "props": {
+      "text": "データ取込（顧客情報）"
+     }
+    },
+    {
+     "id": "t292",
+     "type": "steps",
+     "x": 768,
+     "y": 96,
+     "w": 480,
+     "h": 56,
+     "props": {
+      "steps": "ファイル選択,内容の確認,取込",
+      "current": 2
+     }
+    },
+    {
+     "id": "t293",
+     "type": "panel",
+     "x": 252,
+     "y": 164,
+     "w": 996,
+     "h": 196,
+     "props": {
+      "title": "取り込むファイル"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t294",
+     "type": "focus",
+     "x": 276,
+     "y": 212,
+     "w": 948,
+     "h": 92,
+     "props": {
+      "color": "#94A3B8",
+      "width": 1.5,
+      "dash": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t295",
+     "type": "text",
+     "x": 276,
+     "y": 220,
+     "w": 948,
+     "h": 28,
+     "props": {
+      "text": "ここに CSV ファイルをドラッグ＆ドロップ、または",
+      "size": 14,
+      "color": "#475569",
+      "align": "center"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t296",
+     "type": "button",
+     "x": 690,
+     "y": 254,
+     "w": 120,
+     "h": 36,
+     "props": {
+      "label": "ファイルを選択",
+      "variant": "secondary"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t297",
+     "type": "text",
+     "x": 276,
+     "y": 312,
+     "w": 600,
+     "h": 32,
+     "props": {
+      "text": "選択中：customer_20261025.csv（120 件・48 KB）",
+      "size": 13,
+      "bold": true
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t298",
+     "type": "text",
+     "x": 824,
+     "y": 312,
+     "w": 400,
+     "h": 32,
+     "props": {
+      "text": "文字コード UTF-8、1ファイル 10 MB まで",
+      "size": 12,
+      "color": "#64748B",
+      "align": "right"
+     },
+     "group": "g2"
+    },
+    {
+     "id": "t299",
+     "type": "alert",
+     "x": 252,
+     "y": 376,
+     "w": 996,
+     "h": 44,
+     "props": {
+      "text": "120 件中 3 件にエラーがあります。エラーの行は取り込まれません。",
+      "tone": "warning"
+     }
+    },
+    {
+     "id": "t300",
+     "type": "table",
+     "x": 252,
+     "y": 436,
+     "w": 996,
+     "h": 180,
+     "props": {
+      "columns": "行,顧客番号,氏名,電話番号,判定,内容",
+      "widths": "0.5,1.2,1.4,1.4,0.8,3",
+      "rows": "12\tC-0015001\t青木 誠\t090-1111-2222\tエラー\t電話番号の形式が正しくありません\n45\tC-0015034\t\t03-5555-6666\tエラー\t氏名が入力されていません\n87\tC-0012345\t山田 太郎\t090-1234-5678\tエラー\t同じ顧客番号がすでに登録されています\n1\tC-0015000\t石井 和子\t080-3333-4444\tOK\t"
+     }
+    },
+    {
+     "id": "t301",
+     "type": "button",
+     "x": 252,
+     "y": 648,
+     "w": 160,
+     "h": 40,
+     "props": {
+      "label": "ファイルを選び直す",
+      "variant": "secondary"
+     }
+    },
+    {
+     "id": "t302",
+     "type": "button",
+     "x": 1072,
+     "y": 648,
+     "w": 176,
+     "h": 40,
+     "props": {
+      "label": "117 件を取り込む",
+      "variant": "primary"
+     }
+    }
+   ]
+  },
+  {
+   "name": "システムエラー",
+   "items": [
+    {
+     "id": "t303",
+     "type": "header",
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 56,
+     "props": {
+      "title": "顧客管理システム",
+      "user": "",
+      "logout": false
+     }
+    },
+    {
+     "id": "t304",
+     "type": "marker",
+     "x": 604,
+     "y": 176,
+     "w": 72,
+     "h": 72,
+     "props": {
+      "number": "!",
+      "color": "#D97706"
+     }
+    },
+    {
+     "id": "t305",
+     "type": "text",
+     "x": 240,
+     "y": 272,
+     "w": 800,
+     "h": 40,
+     "props": {
+      "text": "処理中にエラーが発生しました",
+      "size": 22,
+      "bold": true,
+      "align": "center"
+     }
+    },
+    {
+     "id": "t306",
+     "type": "text",
+     "x": 240,
+     "y": 320,
+     "w": 800,
+     "h": 52,
+     "props": {
+      "size": 14,
+      "color": "#475569",
+      "align": "center",
+      "text": "しばらく時間をおいてから、もう一度お試しください。\n解決しない場合は、下のエラー番号を添えてシステム管理者にお問い合わせください。"
+     }
+    },
+    {
+     "id": "t307",
+     "type": "panel",
+     "x": 440,
+     "y": 396,
+     "w": 400,
+     "h": 56,
+     "props": {
+      "title": "",
+      "fill": "#F8FAFC"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t308",
+     "type": "text",
+     "x": 440,
+     "y": 396,
+     "w": 400,
+     "h": 56,
+     "props": {
+      "text": "エラー番号：E500-20261026-0142",
+      "size": 14,
+      "bold": true,
+      "align": "center"
+     },
+     "group": "g1"
+    },
+    {
+     "id": "t309",
+     "type": "button",
+     "x": 560,
+     "y": 480,
+     "w": 160,
+     "h": 40,
+     "props": {
+      "label": "ホームに戻る",
+      "variant": "primary"
+     }
+    }
+   ]
+  }
+ ]
+}
