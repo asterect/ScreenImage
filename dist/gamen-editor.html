@@ -1,0 +1,2887 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>画面イメージエディタ</title>
+<style>
+/* 画面イメージエディタ
+   レイアウト：上にツールバー、左に部品、中央に方眼紙の作業台、右にプロパティ。
+   選択枠は朱色。画面イメージ自体が青系になりやすいので、道具側の色と混ざらないようにしている。 */
+:root {
+  --bg: #E9EDF1;          /* 作業台 */
+  --dots: #C9D1DA;        /* 方眼の点 */
+  --panel: #FFFFFF;
+  --panel-2: #F5F7F9;
+  --ink: #17202B;
+  --muted: #5B6675;
+  --rule: #DADFE6;
+  --accent: #E4572E;      /* 選択・主要操作 */
+  --accent-ink: #FFFFFF;
+  --accent-soft: #FCE7DF;
+  --focus: #E4572E;
+  --shadow: 0 1px 2px rgba(23, 32, 43, .06), 0 8px 24px rgba(23, 32, 43, .10);
+
+  --font-ui: 'BIZ UDPGothic', 'BIZ UDPゴシック', 'Meiryo UI', 'Yu Gothic UI', 'Hiragino Sans', system-ui, sans-serif;
+  --fs-xs: 11px; --fs-s: 12px; --fs-m: 13px; --fs-l: 15px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161B; --dots: #262D36; --panel: #1A1F26; --panel-2: #20262E; --ink: #E5E9EE; --muted: #97A1AE;
+    --rule: #2D343E; --accent: #FF7A4D; --accent-ink: #1A0D07; --accent-soft: #3A2219; --focus: #FF7A4D;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161B; --dots: #262D36; --panel: #1A1F26; --panel-2: #20262E; --ink: #E5E9EE; --muted: #97A1AE;
+  --rule: #2D343E; --accent: #FF7A4D; --accent-ink: #1A0D07; --accent-soft: #3A2219; --focus: #FF7A4D;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 var(--fs-m)/1.5 var(--font-ui); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.spacer { flex: 1; }
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr) 288px;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "top top top" "pal work insp";
+}
+
+/* ---------- ツールバー ---------- */
+.topbar {
+  grid-area: top; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--rule);
+}
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: var(--fs-l); letter-spacing: .02em; white-space: nowrap; }
+.brand-mark { width: 22px; height: 22px; color: var(--accent); }
+.doc-title input {
+  width: 220px; border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 5px 8px; color: var(--muted);
+}
+.doc-title input:hover { border-color: var(--rule); }
+.doc-title input:focus { border-color: var(--accent); color: var(--ink); outline: none; background: var(--panel); }
+.toolgroup { display: flex; align-items: center; gap: 4px; padding-left: 12px; border-left: 1px solid var(--rule); }
+.toolgroup:first-of-type { border-left: 0; }
+.icon-btn, .zoom-label, .btn {
+  border: 1px solid transparent; background: transparent; border-radius: 6px; cursor: pointer; white-space: nowrap;
+}
+.icon-btn { width: 30px; height: 30px; display: grid; place-items: center; color: var(--muted); }
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn:hover, .zoom-label:hover, .btn.ghost:hover { background: var(--panel-2); color: var(--ink); }
+.icon-btn:disabled { opacity: .35; cursor: default; background: transparent; }
+.zoom-label { min-width: 52px; height: 30px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.check { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; color: var(--muted); font-size: var(--fs-s); cursor: pointer; white-space: nowrap; }
+.check input { accent-color: var(--accent); margin: 0; }
+.btn { height: 32px; padding: 0 12px; font-size: var(--fs-m); }
+.btn.ghost { color: var(--ink); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.small { height: 28px; padding: 0 10px; font-size: var(--fs-s); }
+.btn.danger { color: #C2382A; }
+.btn.outline { border-color: var(--rule); background: var(--panel); }
+.btn.outline:hover { border-color: var(--muted); }
+
+/* ---------- 部品パレット ---------- */
+.palette { grid-area: pal; display: flex; flex-direction: column; min-height: 0; background: var(--panel); border-right: 1px solid var(--rule); }
+.pane-head { padding: 14px 14px 10px; display: grid; gap: 8px; }
+.pane-head h2 { margin: 0; font-size: var(--fs-s); letter-spacing: .12em; color: var(--muted); font-weight: 700; }
+.pane-head input {
+  width: 100%; height: 32px; border: 1px solid var(--rule); border-radius: 6px; padding: 0 10px; background: var(--panel-2);
+}
+.pane-head input:focus { outline: none; border-color: var(--accent); background: var(--panel); }
+.palette-body { flex: 1; overflow: auto; padding: 0 10px 12px; }
+.cat { margin-top: 10px; }
+.cat h3 { margin: 0 4px 6px; font-size: var(--fs-xs); letter-spacing: .14em; color: var(--muted); font-weight: 700; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tile {
+  display: grid; grid-template-rows: 44px auto; gap: 4px; padding: 6px 6px 7px; border: 1px solid var(--rule); border-radius: 7px;
+  background: var(--panel); cursor: grab; text-align: center; font-size: var(--fs-s); color: var(--ink); user-select: none;
+}
+.tile:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.tile:active { cursor: grabbing; }
+.tile .thumb { background: #FFFFFF; border-radius: 4px; display: grid; place-items: center; overflow: hidden; }
+.tile .thumb svg { width: 100%; height: 100%; }
+.pane-foot { margin: 0; padding: 10px 14px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--fs-xs); }
+
+/* ---------- 作業台 ---------- */
+.workspace { grid-area: work; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
+.stage {
+  overflow: auto; position: relative; outline: none;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dots) 1px, transparent 1.2px);
+  background-size: 16px 16px;
+}
+.screen-wrap { position: relative; margin: 40px; }
+.screen {
+  position: absolute; left: 0; top: 0; transform-origin: 0 0; background: #FFFFFF;
+  box-shadow: var(--shadow); outline: 1px solid rgba(23, 32, 43, .08);
+  touch-action: none;
+}
+.screen.show-grid {
+  background-image:
+    linear-gradient(to right, rgba(36, 87, 197, .07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(36, 87, 197, .07) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.items, .overlay { position: absolute; inset: 0; }
+.overlay { pointer-events: none; }
+.item { position: absolute; cursor: move; }
+.item svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; font-family: 'Meiryo UI', 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+.item:hover { outline: calc(1px / var(--z, 1)) dashed var(--accent); outline-offset: calc(1px / var(--z, 1)); }
+.item.missing { background: repeating-linear-gradient(45deg, #FDECEC 0 8px, #FFF 8px 16px); border: 1px dashed #C2382A; color: #C2382A; font-size: 12px; display: grid; place-items: center; }
+.sel { position: absolute; border: calc(1.5px / var(--z, 1)) solid var(--accent); }
+.handle {
+  position: absolute; width: calc(9px / var(--z, 1)); height: calc(9px / var(--z, 1));
+  margin: calc(-4.5px / var(--z, 1)) 0 0 calc(-4.5px / var(--z, 1));
+  background: #FFFFFF; border: calc(1.5px / var(--z, 1)) solid var(--accent); border-radius: calc(2px / var(--z, 1));
+  pointer-events: auto;
+}
+.handle[data-dir="n"], .handle[data-dir="s"] { cursor: ns-resize; }
+.handle[data-dir="e"], .handle[data-dir="w"] { cursor: ew-resize; }
+.handle[data-dir="nw"], .handle[data-dir="se"] { cursor: nwse-resize; }
+.handle[data-dir="ne"], .handle[data-dir="sw"] { cursor: nesw-resize; }
+.sel.member { border-width: calc(1px / var(--z, 1)); border-color: rgba(228, 87, 46, .55); }
+.group-box {
+  position: absolute; border: calc(1.5px / var(--z, 1)) dashed var(--accent);
+  margin: calc(-4px / var(--z, 1)); padding: calc(4px / var(--z, 1)); box-sizing: content-box;
+}
+.group-box.inner { border-color: var(--muted); border-width: calc(1px / var(--z, 1)); }
+/* 文字が収まっていない部品の目印（右上の小さな「…」） */
+.item.overflow::after {
+  content: '…'; position: absolute; right: calc(-7px / var(--z, 1)); top: calc(-7px / var(--z, 1));
+  width: calc(16px / var(--z, 1)); height: calc(16px / var(--z, 1)); border-radius: 50%;
+  background: #D97706; color: #FFFFFF; font: 700 calc(11px / var(--z, 1))/calc(14px / var(--z, 1)) var(--font-ui); text-align: center;
+  pointer-events: none;
+}
+.marquee { position: absolute; border: calc(1px / var(--z, 1)) solid var(--accent); background: rgba(228, 87, 46, .08); }
+.size-tip {
+  position: absolute; transform: translate(-50%, 0); padding: 2px 6px; border-radius: 4px;
+  background: var(--accent); color: #FFFFFF; font-size: calc(11px / var(--z, 1)); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.stage.drop-ok .screen { outline: 2px solid var(--accent); }
+
+/* ---------- ページ ---------- */
+.pagebar {
+  display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--panel); border-top: 1px solid var(--rule);
+  overflow-x: auto;
+}
+.pages { display: flex; gap: 4px; }
+.page-tab {
+  height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--rule); background: var(--panel-2); cursor: pointer;
+  font-size: var(--fs-s); white-space: nowrap; color: var(--muted);
+}
+.page-tab[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); font-weight: 700; }
+.page-tab .num { font-variant-numeric: tabular-nums; margin-right: 6px; color: var(--muted); font-weight: 400; }
+.status { color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* ---------- プロパティ ---------- */
+.inspector { grid-area: insp; background: var(--panel); border-left: 1px solid var(--rule); min-height: 0; display: flex; flex-direction: column; }
+.inspector-body { overflow: auto; flex: 1; }
+.insp-section { padding: 14px 16px; border-bottom: 1px solid var(--rule); display: grid; gap: 10px; }
+.insp-section h2 { margin: 0; font-size: var(--fs-l); font-weight: 700; text-wrap: balance; }
+.insp-section h3 { margin: 0; font-size: var(--fs-xs); letter-spacing: .14em; color: var(--muted); font-weight: 700; }
+.insp-kind { color: var(--muted); font-size: var(--fs-xs); letter-spacing: .08em; }
+.geo { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.geo label { display: grid; gap: 2px; font-size: var(--fs-xs); color: var(--muted); }
+.field { display: grid; gap: 4px; }
+.field > span { font-size: var(--fs-s); color: var(--muted); }
+.field input[type="text"], .field input[type="number"], .field textarea, .field select, .geo input {
+  width: 100%; min-width: 0; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); padding: 6px 8px;
+  font-variant-numeric: tabular-nums;
+}
+.field textarea { min-height: 84px; resize: vertical; line-height: 1.5; }
+.field input:focus, .field textarea:focus, .field select:focus, .geo input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.field.bool { grid-template-columns: auto 1fr; align-items: center; gap: 8px; }
+.field.bool > span { color: var(--ink); font-size: var(--fs-m); }
+.field.bool input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+.color-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 6px; align-items: center; }
+.color-row input[type="color"] { width: 34px; height: 32px; padding: 2px; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); cursor: pointer; }
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--rule); cursor: pointer; padding: 0; }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.align-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.align-grid .btn { padding: 0 4px; font-size: var(--fs-s); }
+.hint { margin: 0; color: var(--muted); font-size: var(--fs-s); line-height: 1.7; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 0; font-size: var(--fs-s); }
+.keys dt { font-variant-numeric: tabular-nums; }
+.keys kbd { display: inline-block; min-width: 20px; padding: 0 5px; border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; background: var(--panel-2); font: inherit; font-size: var(--fs-xs); text-align: center; }
+.keys dd { margin: 0; color: var(--muted); }
+
+/* ---------- 通知 ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 56px; transform: translateX(-50%); z-index: 50;
+  background: var(--ink); color: var(--panel); padding: 9px 16px; border-radius: 8px; box-shadow: var(--shadow); font-size: var(--fs-m);
+  max-width: calc(100% - 32px);
+}
+.toast.error { background: #B42318; color: #FFFFFF; }
+
+/* ---------- 狭い画面 ---------- */
+@media (max-width: 900px) {
+  .app {
+    height: auto; min-height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 70vh auto;
+    grid-template-areas: "top" "pal" "work" "insp";
+  }
+  .topbar { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .toolgroup { border-left: 0; padding-left: 0; }
+  .palette { border-right: 0; border-bottom: 1px solid var(--rule); max-height: 260px; }
+  .tiles { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+  .inspector { border-left: 0; border-top: 1px solid var(--rule); }
+  .screen-wrap { margin: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h19" stroke="currentColor" stroke-width="1.6"/><rect x="5.5" y="10.5" width="5" height="7" rx="1" fill="currentColor"/><path d="M13 11.5h6M13 14.5h6M13 17.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span>画面イメージエディタ</span>
+    </div>
+    <label class="doc-title"><span class="sr-only">資料名</span><input id="docTitle" type="text" spellcheck="false"></label>
+
+    <div class="toolgroup" role="group" aria-label="編集">
+      <button class="icon-btn" id="btnUndo" title="元に戻す（Ctrl+Z）" aria-label="元に戻す"><svg viewBox="0 0 20 20"><path d="M7 5 3 9l4 4M3.5 9H12a5 5 0 0 1 0 10h-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="icon-btn" id="btnRedo" title="やり直す（Ctrl+Y）" aria-label="やり直す"><svg viewBox="0 0 20 20"><path d="m13 5 4 4-4 4M16.5 9H8a5 5 0 0 0 0 10h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="toolgroup" role="group" aria-label="表示">
+      <button class="icon-btn" id="btnZoomOut" title="縮小" aria-label="縮小"><svg viewBox="0 0 20 20"><path d="M5 10h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="zoom-label" id="btnZoomFit" title="画面に合わせる">100%</button>
+      <button class="icon-btn" id="btnZoomIn" title="拡大" aria-label="拡大"><svg viewBox="0 0 20 20"><path d="M5 10h10M10 5v10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <label class="check" title="8px 単位で揃える（Alt を押しながら動かすと無効）"><input type="checkbox" id="optSnap" checked><span>グリッドに吸着</span></label>
+      <label class="check"><input type="checkbox" id="optGrid" checked><span>方眼</span></label>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="toolgroup files" role="group" aria-label="ファイル">
+      <button class="btn ghost" id="btnNew">新規</button>
+      <button class="btn ghost" id="btnOpen">開く</button>
+      <button class="btn ghost" id="btnSave" title="編集データを保存（Ctrl+S）">保存</button>
+      <input type="file" id="fileOpen" accept=".json,application/json" hidden>
+    </div>
+    <div class="toolgroup" role="group" aria-label="出力">
+      <button class="btn ghost" id="btnCopyImg" title="表示中のページを画像としてコピー（Excel にそのまま貼り付け可）">画像をコピー</button>
+      <button class="btn ghost" id="btnPng">PNG</button>
+      <button class="btn primary" id="btnPptx">PowerPoint 出力</button>
+    </div>
+  </header>
+
+  <aside class="palette" aria-label="部品">
+    <div class="pane-head">
+      <h2>部品</h2>
+      <input id="paletteSearch" type="search" placeholder="部品を探す" aria-label="部品を探す">
+    </div>
+    <div class="palette-body" id="palette"></div>
+    <p class="pane-foot">ドラッグして配置、またはクリックで中央に追加</p>
+  </aside>
+
+  <main class="workspace">
+    <div class="stage" id="stage" tabindex="-1">
+      <div class="screen-wrap" id="screenWrap">
+        <div class="screen" id="screen">
+          <div class="items" id="items"></div>
+          <div class="overlay" id="overlay"></div>
+        </div>
+      </div>
+    </div>
+    <nav class="pagebar" aria-label="ページ">
+      <div class="pages" id="pages" role="tablist"></div>
+      <button class="btn ghost small" id="btnAddPage">＋ ページ追加</button>
+      <span class="spacer"></span>
+      <span class="status" id="status"></span>
+    </nav>
+  </main>
+
+  <aside class="inspector" aria-label="プロパティ">
+    <div class="inspector-body" id="inspector"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<!-- 本体 -->
+<script>/* core/registry.js */
+/*
+ * 部品レジストリ
+ * ------------------------------------------------------------
+ * 部品は GamenUI.register({...}) で登録する。1つの定義から
+ *   - エディタ上の表示（SVG）
+ *   - PowerPoint 出力（図形・表）
+ *   - パレットのサムネイル
+ *   - プロパティ欄の入力項目
+ * がすべて生成される。部品を増やすときは components/ にファイルを足し、
+ * index.html に <script> を1行追加するだけでよい。
+ *
+ * 定義の形:
+ * {
+ *   type: 'button',            // 一意な識別子（英数字）
+ *   name: 'ボタン',             // パレットに出る名前
+ *   category: '入力',           // パレットの分類
+ *   size: { w: 120, h: 40 },   // 配置したときの初期サイズ(px)
+ *   props: [                   // プロパティ欄の項目
+ *     { key: 'label', label: '表示文字', type: 'text', default: '登録' },
+ *   ],
+ *   draw(p, w, h, ctx) { return [ ...プリミティブ ]; }
+ * }
+ *
+ * props の type: text / textarea / number / color / select / bool
+ *   select は options: [['値','表示名'], ...]
+ *   color は '' を「テーマ色」として扱う（ctx.color() で解決）
+ *
+ * プリミティブ（座標は部品の左上を原点とした px）:
+ *   { t:'rect',    x,y,w,h, fill, stroke, sw, r, dash }
+ *   { t:'ellipse', x,y,w,h, fill, stroke, sw, dash }
+ *   { t:'line',    x1,y1,x2,y2, stroke, sw, dash }
+ *   { t:'tri',     x,y,w,h, fill, dir:'up'|'down'|'left'|'right' }
+ *   { t:'text',    x,y,w,h, text, size, color, bold, align:'left'|'center'|'right', valign:'top'|'middle'|'bottom' }
+ *                  fit:'wrap'（折り返し＋収まらない分は…）|'ellipsis'（1行ごとに…）  … 省略時ははみ出す
+ *   { t:'text',    x,y,w,h, runs:[{ text, size, bold, color }], align, valign }   … 1行の中で大きさや色を変える
+ *   { t:'table',   x,y,w,h, columns:[...], rows:[[...]], colRatios, size,
+ *                  headerFill, headerColor, border, stripe, align:[...] }
+ */
+(function () {
+  'use strict';
+
+  const defs = new Map();
+  const order = [];
+
+  const PROP_TYPES = ['text', 'textarea', 'number', 'color', 'select', 'bool'];
+
+  function register(def) {
+    const where = def && def.type ? `部品「${def.type}」` : '部品';
+    if (!def || !/^[a-zA-Z][\w-]*$/.test(def.type || '')) throw new Error(`${where}: type は英数字で指定してください`);
+    if (defs.has(def.type)) throw new Error(`${where}: 同じ type がすでに登録されています`);
+    if (typeof def.draw !== 'function') throw new Error(`${where}: draw(p, w, h, ctx) が必要です`);
+    def.name = def.name || def.type;
+    def.category = def.category || 'その他';
+    def.size = def.size || { w: 160, h: 40 };
+    def.props = (def.props || []).map((p) => {
+      if (!PROP_TYPES.includes(p.type)) throw new Error(`${where}: プロパティ「${p.key}」の type「${p.type}」は未対応です`);
+      return { label: p.key, ...p };
+    });
+    defs.set(def.type, def);
+    order.push(def.type);
+  }
+
+  function defaults(type) {
+    const def = defs.get(type);
+    const out = {};
+    if (def) def.props.forEach((p) => { out[p.key] = p.default !== undefined ? p.default : ''; });
+    return out;
+  }
+
+  function categories() {
+    const seen = [];
+    order.forEach((t) => { const c = defs.get(t).category; if (!seen.includes(c)) seen.push(c); });
+    return seen;
+  }
+
+  window.GamenUI = {
+    register,
+    get: (type) => defs.get(type),
+    all: () => order.map((t) => defs.get(t)),
+    defaults,
+    categories,
+  };
+})();
+
+</script>
+<script>/* core/render.js */
+/*
+ * 描画まわり
+ *  - makeCtx(theme): 部品の draw() に渡すヘルパー群
+ *  - toSVG(prims):   プリミティブ配列を SVG 要素の文字列に変換
+ *  - tableLayout():  表の列幅・行位置の計算（SVG と PowerPoint で共通）
+ */
+(function () {
+  'use strict';
+
+  // 画面イメージ内の文字に使うフォント。PowerPoint 出力も同じフォント名を指定する。
+  const FONT_NAME = 'Meiryo UI';
+  const FONT_STACK = "'Meiryo UI', 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif";
+  const LINE_HEIGHT = 1.35;
+
+  // 部品で共通して使う色
+  const C = {
+    ink: '#1F2937', sub: '#64748B', faint: '#94A3B8', line: '#CBD5E1', lineSoft: '#E2E8F0',
+    soft: '#F1F5F9', softer: '#F8FAFC', paper: '#FFFFFF',
+    danger: '#DC2626', success: '#16A34A', warning: '#D97706', info: '#2563EB',
+  };
+
+  function hexToRgb(hex) {
+    let h = String(hex || '').replace('#', '').trim();
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return [0, 0, 0];
+    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  }
+  function rgbToHex(rgb) {
+    return '#' + rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+  function mix(hex, target, t) {
+    const a = hexToRgb(hex);
+    return rgbToHex(a.map((v, i) => v + (target[i] - v) * t));
+  }
+
+  let measureCanvas = null;
+  function measure(text, size, bold) {
+    if (!measureCanvas) measureCanvas = document.createElement('canvas').getContext('2d');
+    measureCanvas.font = `${bold ? 'bold ' : ''}${size}px ${FONT_STACK}`;
+    const lines = String(text == null ? '' : text).split('\n');
+    return Math.max(...lines.map((l) => measureCanvas.measureText(l).width));
+  }
+
+  // 「A,B,C」や「A、B、C」を配列にする
+  function list(value) {
+    return String(value == null ? '' : value).split(/[,、，]/).map((s) => s.trim()).filter((s) => s !== '');
+  }
+  function lines(value) {
+    return String(value == null ? '' : value).split(/\r?\n/).map((s) => s.trim()).filter((s) => s !== '');
+  }
+
+  function makeCtx(theme) {
+    const primary = (theme && theme.primary) || '#2457C5';
+    return {
+      C,
+      FONT_NAME,
+      theme: { primary },
+      color: (c) => c || primary,
+      tint: (hex, t) => mix(hex, [255, 255, 255], t),
+      shade: (hex, t) => mix(hex, [0, 0, 0], t),
+      // 背景色の上で読みやすい文字色（白 or 濃い灰）
+      onColor: (bg) => {
+        const [r, g, b] = hexToRgb(bg || primary).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.45 ? C.ink : '#FFFFFF';
+      },
+      measure,
+      list,
+      lines,
+    };
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  const n = (v) => Math.round((Number(v) || 0) * 100) / 100;
+
+  function strokeAttrs(p) {
+    if (!p.stroke) return 'stroke="none"';
+    const sw = p.sw == null ? 1 : p.sw;
+    return `stroke="${esc(p.stroke)}" stroke-width="${n(sw)}"${p.dash ? ` stroke-dasharray="${n(sw * 4)} ${n(sw * 3)}"` : ''}`;
+  }
+
+  // 数値・金額らしいセルは右寄せ
+  // 0 で始まる番号（顧客番号など）はコードとみなして左寄せのまま
+  function isNumeric(s) {
+    const t = String(s).trim();
+    if (/^0\d/.test(t)) return false;
+    return /^[-+]?[¥￥$]?[\d,]+(\.\d+)?(円|%|件)?$/.test(t);
+  }
+
+  function tableLayout(p) {
+    const cols = p.columns.length || 1;
+    let ratios = (p.colRatios || []).map(Number).filter((v) => v > 0);
+    if (ratios.length !== cols) ratios = new Array(cols).fill(1);
+    const total = ratios.reduce((a, b) => a + b, 0);
+    const colW = [];
+    let acc = 0;
+    ratios.forEach((r, i) => {
+      const w = i === cols - 1 ? p.w - acc : Math.round((p.w * r) / total);
+      colW.push(w);
+      acc += w;
+    });
+    const colX = [];
+    acc = 0;
+    colW.forEach((w) => { colX.push(acc); acc += w; });
+    const rowCount = p.rows.length + 1;
+    const rowH = p.h / rowCount;
+    const align = p.columns.map((_, ci) => {
+      if (p.align && p.align[ci]) return p.align[ci];
+      const body = p.rows.map((r) => r[ci]).filter((v) => v != null && v !== '');
+      return body.length && body.every(isNumeric) ? 'right' : 'left';
+    });
+    return { colW, colX, rowH, rowCount, align };
+  }
+
+  // 大きさの違う文字を1行に並べる（例：「3,250,000」＋「円」）。ベースラインを揃える。
+  function runsSVG(p) {
+    const runs = p.runs.filter((r) => r && r.text != null && r.text !== '');
+    const maxSize = Math.max(...runs.map((r) => r.size || 14), 1);
+    const va = p.valign || 'middle';
+    const base = va === 'top' ? p.y + maxSize * 1.05 : va === 'bottom' ? p.y + p.h - maxSize * 0.3 : p.y + p.h / 2 + maxSize * 0.36;
+    const al = p.align || 'left';
+    const x = al === 'center' ? p.x + p.w / 2 : al === 'right' ? p.x + p.w : p.x;
+    const anchor = al === 'center' ? 'middle' : al === 'right' ? 'end' : 'start';
+    return `<text x="${n(x)}" y="${n(base)}" text-anchor="${anchor}">` + runs.map((r) =>
+      `<tspan font-size="${n(r.size || 14)}"${r.bold ? ' font-weight="bold"' : ''} fill="${esc(r.color || C.ink)}">${esc(r.text)}</tspan>`).join('') + '</text>';
+  }
+
+  // ---- 文字の折り返し・省略 ----------------------------------------------
+  // fit: 'wrap'     … 幅で折り返し、高さに収まらない分は最終行を「…」で省略
+  //      'ellipsis' … 折り返さず、幅を超えたら「…」で省略（改行は残す）
+  //      なし       … そのまま（はみ出しても描く）
+  // 画面・PNG・PowerPoint の3つで同じ結果になるよう、改行位置はここで決めて渡す。
+  const NO_LINE_START = '、。，．,.）)］]｝}」』〉》】〕・：；:;！!？?ーぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ々〜…';
+  let overflowHit = false; // 直近の描画で文字が収まらなかったか（エディタの警告表示用）
+
+  function ellipsize(line, size, bold, w) {
+    if (measure(line, size, bold) <= w) return line;
+    let s = line;
+    while (s.length && measure(s + '…', size, bold) > w) s = s.slice(0, -1);
+    return s + '…';
+  }
+
+  function wrapParagraph(text, size, bold, w) {
+    const out = [];
+    let cur = '';
+    for (const ch of text) {
+      if (cur === '' && ch === ' ') continue;
+      if (measure(cur + ch, size, bold) <= w || cur === '') { cur += ch; continue; }
+      if (NO_LINE_START.includes(ch)) { out.push(cur + ch); cur = ''; continue; } // 句読点は行頭に置かない
+      const sp = cur.lastIndexOf(' ');
+      if (/[A-Za-z0-9]/.test(ch) && sp > 0 && /[A-Za-z0-9]$/.test(cur)) { // 英単語は途中で切らない
+        out.push(cur.slice(0, sp));
+        cur = cur.slice(sp + 1) + ch;
+      } else { out.push(cur); cur = ch; }
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function fitText(p) {
+    const size = p.size || 14;
+    const raw = String(p.text == null ? '' : p.text).split('\n');
+    if (!p.fit || !(p.w > 0)) return raw;
+    const lh = size * LINE_HEIGHT;
+    const maxLines = Math.max(1, Math.floor((p.h + 0.5) / lh));
+    let lines = p.fit === 'wrap' ? raw.flatMap((l) => wrapParagraph(l, size, p.bold, p.w)) : raw.slice();
+    let cut = false;
+    if (lines.length > maxLines) { lines = lines.slice(0, maxLines); cut = true; }
+    lines = lines.map((l) => { const f = ellipsize(l, size, p.bold, p.w); if (f !== l) cut = true; return f; });
+    if (cut) {
+      const i = lines.length - 1;
+      if (!lines[i].endsWith('…')) lines[i] = ellipsize(lines[i] + '…', size, p.bold, p.w);
+    }
+    if (cut) overflowHit = true;
+    return lines;
+  }
+
+  function textSVG(p) {
+    if (Array.isArray(p.runs)) return runsSVG(p);
+    const size = p.size || 14;
+    const lh = size * LINE_HEIGHT;
+    const ls = fitText(p);
+    const block = ls.length * lh;
+    const va = p.valign || 'middle';
+    const top = va === 'top' ? p.y : va === 'bottom' ? p.y + p.h - block : p.y + (p.h - block) / 2;
+    const al = p.align || 'left';
+    const x = al === 'center' ? p.x + p.w / 2 : al === 'right' ? p.x + p.w : p.x;
+    const anchor = al === 'center' ? 'middle' : al === 'right' ? 'end' : 'start';
+    return ls.map((line, i) => `<text x="${n(x)}" y="${n(top + lh * i + lh / 2)}" font-size="${n(size)}"` +
+      `${p.bold ? ' font-weight="bold"' : ''} fill="${esc(p.color || C.ink)}" text-anchor="${anchor}" dominant-baseline="central">${esc(line)}</text>`).join('');
+  }
+
+  function tableSVG(p) {
+    const L = tableLayout(p);
+    const size = p.size || 13;
+    const border = p.border || C.line;
+    let s = `<g transform="translate(${n(p.x)} ${n(p.y)})">`;
+    s += `<rect x="0" y="0" width="${n(p.w)}" height="${n(L.rowH)}" fill="${esc(p.headerFill || C.soft)}"/>`;
+    if (p.stripe) {
+      p.rows.forEach((_, ri) => {
+        if (ri % 2 === 1) s += `<rect x="0" y="${n(L.rowH * (ri + 1))}" width="${n(p.w)}" height="${n(L.rowH)}" fill="${C.softer}"/>`;
+      });
+    }
+    for (let r = 1; r < L.rowCount; r++) {
+      s += `<line x1="0" y1="${n(L.rowH * r)}" x2="${n(p.w)}" y2="${n(L.rowH * r)}" stroke="${esc(border)}" stroke-width="1"/>`;
+    }
+    L.colX.slice(1).forEach((x) => {
+      s += `<line x1="${n(x)}" y1="0" x2="${n(x)}" y2="${n(p.h)}" stroke="${esc(border)}" stroke-width="1"/>`;
+    });
+    s += `<rect x="0" y="0" width="${n(p.w)}" height="${n(p.h)}" fill="none" stroke="${esc(border)}" stroke-width="1"/>`;
+    const pad = 8;
+    const cell = (text, ci, ri, bold, color) => {
+      const al = ri === 0 ? (L.align[ci] === 'right' ? 'right' : 'left') : L.align[ci];
+      return textSVG({ x: L.colX[ci] + pad, y: L.rowH * ri, w: L.colW[ci] - pad * 2, h: L.rowH, text, size, bold, color, align: al, fit: 'wrap' });
+    };
+    p.columns.forEach((c, ci) => { s += cell(c, ci, 0, true, p.headerColor || C.ink); });
+    p.rows.forEach((row, ri) => p.columns.forEach((_, ci) => { s += cell(row[ci] == null ? '' : row[ci], ci, ri + 1, false, C.ink); }));
+    return s + '</g>';
+  }
+
+  function triPoints(p) {
+    const { x, y, w, h } = p;
+    switch (p.dir) {
+      case 'up': return [[x + w / 2, y], [x + w, y + h], [x, y + h]];
+      case 'left': return [[x, y + h / 2], [x + w, y], [x + w, y + h]];
+      case 'right': return [[x, y], [x + w, y + h / 2], [x, y + h]];
+      default: return [[x, y], [x + w, y], [x + w / 2, y + h]];
+    }
+  }
+
+  function toSVG(prims) {
+    return (prims || []).map((p) => {
+      switch (p.t) {
+        case 'rect':
+          return `<rect x="${n(p.x)}" y="${n(p.y)}" width="${n(Math.max(0, p.w))}" height="${n(Math.max(0, p.h))}"` +
+            `${p.r ? ` rx="${n(p.r)}"` : ''} fill="${esc(p.fill || 'none')}" ${strokeAttrs(p)}/>`;
+        case 'ellipse':
+          return `<ellipse cx="${n(p.x + p.w / 2)}" cy="${n(p.y + p.h / 2)}" rx="${n(p.w / 2)}" ry="${n(p.h / 2)}" fill="${esc(p.fill || 'none')}" ${strokeAttrs(p)}/>`;
+        case 'line': {
+          const stroke = p.stroke || C.ink;
+          if (!p.arrow) {
+            return `<line x1="${n(p.x1)}" y1="${n(p.y1)}" x2="${n(p.x2)}" y2="${n(p.y2)}" ${strokeAttrs({ ...p, stroke })} stroke-linecap="round"/>`;
+          }
+          // 終点に矢じり（PowerPoint の「三角」矢じりに近い大きさ）
+          const sw = p.sw == null ? 1 : p.sw;
+          const len = Math.max(8, sw * 3.5), half = Math.max(4, sw * 1.75);
+          const a = Math.atan2(p.y2 - p.y1, p.x2 - p.x1);
+          const bx = p.x2 - Math.cos(a) * len, by = p.y2 - Math.sin(a) * len;
+          const pts = [[p.x2, p.y2], [bx - Math.sin(a) * half, by + Math.cos(a) * half], [bx + Math.sin(a) * half, by - Math.cos(a) * half]];
+          return `<line x1="${n(p.x1)}" y1="${n(p.y1)}" x2="${n(bx)}" y2="${n(by)}" ${strokeAttrs({ ...p, stroke })}/>` +
+            `<polygon points="${pts.map((pt) => pt.map(n).join(',')).join(' ')}" fill="${esc(stroke)}"/>`;
+        }
+        case 'tri':
+          return `<polygon points="${triPoints(p).map((pt) => pt.map(n).join(',')).join(' ')}" fill="${esc(p.fill || C.ink)}"/>`;
+        case 'text':
+          return textSVG(p);
+        case 'table':
+          return tableSVG(p);
+        default:
+          return '';
+      }
+    }).join('');
+  }
+
+  // 1部品をサイズ付きの SVG 文字列にする（パレットのサムネイルや PNG 出力用）
+  function itemSVG(def, props, w, h, ctx) {
+    let prims = [];
+    try { prims = def.draw(props, w, h, ctx) || []; } catch (e) { console.error(def.type, e); }
+    overflowHit = false;
+    const svg = toSVG(prims);
+    itemSVG.overflow = overflowHit;
+    return svg;
+  }
+
+  window.GamenRender = { makeCtx, toSVG, itemSVG, tableLayout, fitText, FONT_NAME, FONT_STACK, LINE_HEIGHT, C };
+})();
+
+</script>
+<script>/* core/zip.js */
+/*
+ * 最小限の ZIP 作成（無圧縮）
+ * PowerPoint ファイル（.pptx）は XML を ZIP にまとめたもの。外部ライブラリに頼らず、
+ * オフラインでも動くように自前で書いている。
+ */
+(function () {
+  'use strict';
+
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      t[i] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+
+  // files: [{ name: 'path/in/zip', data: string | Uint8Array }]
+  function makeZip(files) {
+    const enc = new TextEncoder();
+    const now = new Date();
+    const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+    const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+
+    const chunks = [];
+    const central = [];
+    let offset = 0;
+
+    files.forEach((f) => {
+      const name = enc.encode(f.name);
+      const data = typeof f.data === 'string' ? enc.encode(f.data) : f.data;
+      const crc = crc32(data);
+
+      const local = new DataView(new ArrayBuffer(30));
+      local.setUint32(0, 0x04034b50, true);
+      local.setUint16(4, 20, true);
+      local.setUint16(6, 0x0800, true); // UTF-8 ファイル名
+      local.setUint16(8, 0, true);      // 無圧縮
+      local.setUint16(10, dosTime, true);
+      local.setUint16(12, dosDate, true);
+      local.setUint32(14, crc, true);
+      local.setUint32(18, data.length, true);
+      local.setUint32(22, data.length, true);
+      local.setUint16(26, name.length, true);
+      local.setUint16(28, 0, true);
+      chunks.push(new Uint8Array(local.buffer), name, data);
+
+      const cen = new DataView(new ArrayBuffer(46));
+      cen.setUint32(0, 0x02014b50, true);
+      cen.setUint16(4, 20, true);
+      cen.setUint16(6, 20, true);
+      cen.setUint16(8, 0x0800, true);
+      cen.setUint16(10, 0, true);
+      cen.setUint16(12, dosTime, true);
+      cen.setUint16(14, dosDate, true);
+      cen.setUint32(16, crc, true);
+      cen.setUint32(20, data.length, true);
+      cen.setUint32(24, data.length, true);
+      cen.setUint16(28, name.length, true);
+      cen.setUint32(42, offset, true);
+      central.push(new Uint8Array(cen.buffer), name);
+
+      offset += 30 + name.length + data.length;
+    });
+
+    const centralSize = central.reduce((a, c) => a + c.length, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true);
+    end.setUint16(8, files.length, true);
+    end.setUint16(10, files.length, true);
+    end.setUint32(12, centralSize, true);
+    end.setUint32(16, offset, true);
+
+    return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+  }
+
+  window.GamenZip = { makeZip, crc32 };
+})();
+
+</script>
+<script>/* core/pptx-template.js */
+// 自動生成ファイル（tools/gen_template.py）。PowerPointが受け付けるマスター・レイアウト・テーマのXML。
+window.GamenPptxTemplate = {
+"master": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<p:sldMaster xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id=\"1\" name=\"\"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"0\" cy=\"0\"/><a:chOff x=\"0\" y=\"0\"/><a:chExt cx=\"0\" cy=\"0\"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMap bg1=\"lt1\" tx1=\"dk1\" bg2=\"lt2\" tx2=\"dk2\" accent1=\"accent1\" accent2=\"accent2\" accent3=\"accent3\" accent4=\"accent4\" accent5=\"accent5\" accent6=\"accent6\" hlink=\"hlink\" folHlink=\"folHlink\"/><p:sldLayoutIdLst><p:sldLayoutId id=\"2147483649\" r:id=\"rId1\"/></p:sldLayoutIdLst><p:hf sldNum=\"0\" hdr=\"0\" ftr=\"0\" dt=\"0\"/><p:txStyles> <p:titleStyle>  <a:lvl1pPr algn=\"ctr\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"0\"/></a:spcBef><a:buNone/><a:defRPr sz=\"4400\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mj-lt\"/><a:ea typeface=\"+mj-ea\"/><a:cs typeface=\"+mj-cs\"/></a:defRPr></a:lvl1pPr> </p:titleStyle> <p:bodyStyle>  <a:lvl1pPr marL=\"342900\" indent=\"-342900\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"•\"/><a:defRPr sz=\"3200\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl1pPr>  <a:lvl2pPr marL=\"742950\" indent=\"-285750\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"–\"/><a:defRPr sz=\"2800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl2pPr>  <a:lvl3pPr marL=\"1143000\" indent=\"-228600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"•\"/><a:defRPr sz=\"2400\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl3pPr>  <a:lvl4pPr marL=\"1600200\" indent=\"-228600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"–\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl4pPr>  <a:lvl5pPr marL=\"2057400\" indent=\"-228600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"»\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl5pPr>  <a:lvl6pPr marL=\"2514600\" indent=\"-228600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"•\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl6pPr>  <a:lvl7pPr marL=\"2971800\" indent=\"-228600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"•\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl7pPr>  <a:lvl8pPr marL=\"3429000\" indent=\"-228600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"•\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl8pPr>  <a:lvl9pPr marL=\"3886200\" indent=\"-228600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\" pitchFamily=\"34\" charset=\"0\"/><a:buChar char=\"•\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl9pPr> </p:bodyStyle> <p:otherStyle>  <a:defPPr><a:defRPr lang=\"en-US\"/></a:defPPr>  <a:lvl1pPr marL=\"0\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl1pPr>  <a:lvl2pPr marL=\"457200\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl2pPr>  <a:lvl3pPr marL=\"914400\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl3pPr>  <a:lvl4pPr marL=\"1371600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl4pPr>  <a:lvl5pPr marL=\"1828800\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl5pPr>  <a:lvl6pPr marL=\"2286000\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl6pPr>  <a:lvl7pPr marL=\"2743200\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl7pPr>  <a:lvl8pPr marL=\"3200400\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl8pPr>  <a:lvl9pPr marL=\"3657600\" algn=\"l\" defTabSz=\"914400\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl9pPr> </p:otherStyle></p:txStyles></p:sldMaster>",
+"layout": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><p:sldLayout xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" preserve=\"1\"><p:cSld name=\"DEFAULT\"><p:bg><p:bgRef idx=\"1001\"><a:schemeClr val=\"bg1\"/></p:bgRef></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id=\"1\" name=\"\"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"0\" cy=\"0\"/><a:chOff x=\"0\" y=\"0\"/><a:chExt cx=\"0\" cy=\"0\"/></a:xfrm></p:grpSpPr></p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>",
+"theme": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><a:theme xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" name=\"Office Theme\"><a:themeElements><a:clrScheme name=\"Office\"><a:dk1><a:sysClr val=\"windowText\" lastClr=\"000000\"/></a:dk1><a:lt1><a:sysClr val=\"window\" lastClr=\"FFFFFF\"/></a:lt1><a:dk2><a:srgbClr val=\"44546A\"/></a:dk2><a:lt2><a:srgbClr val=\"E7E6E6\"/></a:lt2><a:accent1><a:srgbClr val=\"4472C4\"/></a:accent1><a:accent2><a:srgbClr val=\"ED7D31\"/></a:accent2><a:accent3><a:srgbClr val=\"A5A5A5\"/></a:accent3><a:accent4><a:srgbClr val=\"FFC000\"/></a:accent4><a:accent5><a:srgbClr val=\"5B9BD5\"/></a:accent5><a:accent6><a:srgbClr val=\"70AD47\"/></a:accent6><a:hlink><a:srgbClr val=\"0563C1\"/></a:hlink><a:folHlink><a:srgbClr val=\"954F72\"/></a:folHlink></a:clrScheme><a:fontScheme name=\"Office\"><a:majorFont><a:latin typeface=\"Meiryo UI\"/><a:ea typeface=\"\"/><a:cs typeface=\"\"/><a:font script=\"Jpan\" typeface=\"Meiryo UI\"/><a:font script=\"Hang\" typeface=\"맑은 고딕\"/><a:font script=\"Hans\" typeface=\"等线 Light\"/><a:font script=\"Hant\" typeface=\"新細明體\"/><a:font script=\"Arab\" typeface=\"Times New Roman\"/><a:font script=\"Hebr\" typeface=\"Times New Roman\"/><a:font script=\"Thai\" typeface=\"Angsana New\"/><a:font script=\"Ethi\" typeface=\"Nyala\"/><a:font script=\"Beng\" typeface=\"Vrinda\"/><a:font script=\"Gujr\" typeface=\"Shruti\"/><a:font script=\"Khmr\" typeface=\"MoolBoran\"/><a:font script=\"Knda\" typeface=\"Tunga\"/><a:font script=\"Guru\" typeface=\"Raavi\"/><a:font script=\"Cans\" typeface=\"Euphemia\"/><a:font script=\"Cher\" typeface=\"Plantagenet Cherokee\"/><a:font script=\"Yiii\" typeface=\"Microsoft Yi Baiti\"/><a:font script=\"Tibt\" typeface=\"Microsoft Himalaya\"/><a:font script=\"Thaa\" typeface=\"MV Boli\"/><a:font script=\"Deva\" typeface=\"Mangal\"/><a:font script=\"Telu\" typeface=\"Gautami\"/><a:font script=\"Taml\" typeface=\"Latha\"/><a:font script=\"Syrc\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Orya\" typeface=\"Kalinga\"/><a:font script=\"Mlym\" typeface=\"Kartika\"/><a:font script=\"Laoo\" typeface=\"DokChampa\"/><a:font script=\"Sinh\" typeface=\"Iskoola Pota\"/><a:font script=\"Mong\" typeface=\"Mongolian Baiti\"/><a:font script=\"Viet\" typeface=\"Times New Roman\"/><a:font script=\"Uigh\" typeface=\"Microsoft Uighur\"/><a:font script=\"Geor\" typeface=\"Sylfaen\"/><a:font script=\"Armn\" typeface=\"Arial\"/><a:font script=\"Bugi\" typeface=\"Leelawadee UI\"/><a:font script=\"Bopo\" typeface=\"Microsoft JhengHei\"/><a:font script=\"Java\" typeface=\"Javanese Text\"/><a:font script=\"Lisu\" typeface=\"Segoe UI\"/><a:font script=\"Mymr\" typeface=\"Myanmar Text\"/><a:font script=\"Nkoo\" typeface=\"Ebrima\"/><a:font script=\"Olck\" typeface=\"Nirmala UI\"/><a:font script=\"Osma\" typeface=\"Ebrima\"/><a:font script=\"Phag\" typeface=\"Phagspa\"/><a:font script=\"Syrn\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Syrj\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Syre\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Sora\" typeface=\"Nirmala UI\"/><a:font script=\"Tale\" typeface=\"Microsoft Tai Le\"/><a:font script=\"Talu\" typeface=\"Microsoft New Tai Lue\"/><a:font script=\"Tfng\" typeface=\"Ebrima\"/></a:majorFont><a:minorFont><a:latin typeface=\"Meiryo UI\"/><a:ea typeface=\"\"/><a:cs typeface=\"\"/><a:font script=\"Jpan\" typeface=\"Meiryo UI\"/><a:font script=\"Hang\" typeface=\"맑은 고딕\"/><a:font script=\"Hans\" typeface=\"等线\"/><a:font script=\"Hant\" typeface=\"新細明體\"/><a:font script=\"Arab\" typeface=\"Arial\"/><a:font script=\"Hebr\" typeface=\"Arial\"/><a:font script=\"Thai\" typeface=\"Cordia New\"/><a:font script=\"Ethi\" typeface=\"Nyala\"/><a:font script=\"Beng\" typeface=\"Vrinda\"/><a:font script=\"Gujr\" typeface=\"Shruti\"/><a:font script=\"Khmr\" typeface=\"DaunPenh\"/><a:font script=\"Knda\" typeface=\"Tunga\"/><a:font script=\"Guru\" typeface=\"Raavi\"/><a:font script=\"Cans\" typeface=\"Euphemia\"/><a:font script=\"Cher\" typeface=\"Plantagenet Cherokee\"/><a:font script=\"Yiii\" typeface=\"Microsoft Yi Baiti\"/><a:font script=\"Tibt\" typeface=\"Microsoft Himalaya\"/><a:font script=\"Thaa\" typeface=\"MV Boli\"/><a:font script=\"Deva\" typeface=\"Mangal\"/><a:font script=\"Telu\" typeface=\"Gautami\"/><a:font script=\"Taml\" typeface=\"Latha\"/><a:font script=\"Syrc\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Orya\" typeface=\"Kalinga\"/><a:font script=\"Mlym\" typeface=\"Kartika\"/><a:font script=\"Laoo\" typeface=\"DokChampa\"/><a:font script=\"Sinh\" typeface=\"Iskoola Pota\"/><a:font script=\"Mong\" typeface=\"Mongolian Baiti\"/><a:font script=\"Viet\" typeface=\"Arial\"/><a:font script=\"Uigh\" typeface=\"Microsoft Uighur\"/><a:font script=\"Geor\" typeface=\"Sylfaen\"/><a:font script=\"Armn\" typeface=\"Arial\"/><a:font script=\"Bugi\" typeface=\"Leelawadee UI\"/><a:font script=\"Bopo\" typeface=\"Microsoft JhengHei\"/><a:font script=\"Java\" typeface=\"Javanese Text\"/><a:font script=\"Lisu\" typeface=\"Segoe UI\"/><a:font script=\"Mymr\" typeface=\"Myanmar Text\"/><a:font script=\"Nkoo\" typeface=\"Ebrima\"/><a:font script=\"Olck\" typeface=\"Nirmala UI\"/><a:font script=\"Osma\" typeface=\"Ebrima\"/><a:font script=\"Phag\" typeface=\"Phagspa\"/><a:font script=\"Syrn\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Syrj\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Syre\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Sora\" typeface=\"Nirmala UI\"/><a:font script=\"Tale\" typeface=\"Microsoft Tai Le\"/><a:font script=\"Talu\" typeface=\"Microsoft New Tai Lue\"/><a:font script=\"Tfng\" typeface=\"Ebrima\"/></a:minorFont></a:fontScheme><a:fmtScheme name=\"Office\"><a:fillStyleLst><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:gradFill rotWithShape=\"1\"><a:gsLst><a:gs pos=\"0\"><a:schemeClr val=\"phClr\"><a:lumMod val=\"110000\"/><a:satMod val=\"105000\"/><a:tint val=\"67000\"/></a:schemeClr></a:gs><a:gs pos=\"50000\"><a:schemeClr val=\"phClr\"><a:lumMod val=\"105000\"/><a:satMod val=\"103000\"/><a:tint val=\"73000\"/></a:schemeClr></a:gs><a:gs pos=\"100000\"><a:schemeClr val=\"phClr\"><a:lumMod val=\"105000\"/><a:satMod val=\"109000\"/><a:tint val=\"81000\"/></a:schemeClr></a:gs></a:gsLst><a:lin ang=\"5400000\" scaled=\"0\"/></a:gradFill><a:gradFill rotWithShape=\"1\"><a:gsLst><a:gs pos=\"0\"><a:schemeClr val=\"phClr\"><a:satMod val=\"103000\"/><a:lumMod val=\"102000\"/><a:tint val=\"94000\"/></a:schemeClr></a:gs><a:gs pos=\"50000\"><a:schemeClr val=\"phClr\"><a:satMod val=\"110000\"/><a:lumMod val=\"100000\"/><a:shade val=\"100000\"/></a:schemeClr></a:gs><a:gs pos=\"100000\"><a:schemeClr val=\"phClr\"><a:lumMod val=\"99000\"/><a:satMod val=\"120000\"/><a:shade val=\"78000\"/></a:schemeClr></a:gs></a:gsLst><a:lin ang=\"5400000\" scaled=\"0\"/></a:gradFill></a:fillStyleLst><a:lnStyleLst><a:ln w=\"6350\" cap=\"flat\" cmpd=\"sng\" algn=\"ctr\"><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:prstDash val=\"solid\"/><a:miter lim=\"800000\"/></a:ln><a:ln w=\"12700\" cap=\"flat\" cmpd=\"sng\" algn=\"ctr\"><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:prstDash val=\"solid\"/><a:miter lim=\"800000\"/></a:ln><a:ln w=\"19050\" cap=\"flat\" cmpd=\"sng\" algn=\"ctr\"><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:prstDash val=\"solid\"/><a:miter lim=\"800000\"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad=\"57150\" dist=\"19050\" dir=\"5400000\" algn=\"ctr\" rotWithShape=\"0\"><a:srgbClr val=\"000000\"><a:alpha val=\"63000\"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:solidFill><a:schemeClr val=\"phClr\"><a:tint val=\"95000\"/><a:satMod val=\"170000\"/></a:schemeClr></a:solidFill><a:gradFill rotWithShape=\"1\"><a:gsLst><a:gs pos=\"0\"><a:schemeClr val=\"phClr\"><a:tint val=\"93000\"/><a:satMod val=\"150000\"/><a:shade val=\"98000\"/><a:lumMod val=\"102000\"/></a:schemeClr></a:gs><a:gs pos=\"50000\"><a:schemeClr val=\"phClr\"><a:tint val=\"98000\"/><a:satMod val=\"130000\"/><a:shade val=\"90000\"/><a:lumMod val=\"103000\"/></a:schemeClr></a:gs><a:gs pos=\"100000\"><a:schemeClr val=\"phClr\"><a:shade val=\"63000\"/><a:satMod val=\"120000\"/></a:schemeClr></a:gs></a:gsLst><a:lin ang=\"5400000\" scaled=\"0\"/></a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/><a:extLst><a:ext uri=\"{05A4C25C-085E-4340-85A3-A5531E510DB2}\"><thm15:themeFamily xmlns:thm15=\"http://schemas.microsoft.com/office/thememl/2012/main\" name=\"Office Theme\" id=\"{62F939B6-93AF-4DB8-9C6B-D6C7DFDC589F}\" vid=\"{4A3C46E8-61CC-4603-A589-7422A47A8E4A}\"/></a:ext></a:extLst></a:theme>"
+};
+
+</script>
+<script>/* core/pptx.js */
+/*
+ * PowerPoint（.pptx）出力
+ *  - 1ページ = 1スライド。スライドの大きさは画面サイズと同じ比率（1px = 1/96 インチ）
+ *  - 部品ごとに図形をグループ化するので、PowerPoint 上でも部品単位で動かせる
+ *  - 表は PowerPoint の表として出力する（グループには入れられないため単独で置く）
+ */
+(function () {
+  'use strict';
+
+  const EMU = 9525; // 1px あたりの EMU（914400 / 96）
+  const NS = 'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ' +
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
+    'xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"';
+  const HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  const REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+
+  const emu = (px) => Math.round((Number(px) || 0) * EMU);
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    // XML で使えない制御文字を除く
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+  const hex = (c) => {
+    let h = String(c || '').replace('#', '').trim();
+    if (h.length === 3) h = h.split('').map((x) => x + x).join('');
+    return /^[0-9a-fA-F]{6}$/.test(h) ? h.toUpperCase() : null;
+  };
+
+  class Slide {
+    constructor() { this.nextId = 2; this.parts = []; }
+    id() { return this.nextId++; }
+  }
+
+  function fillXml(color) {
+    const h = hex(color);
+    return h ? `<a:solidFill><a:srgbClr val="${h}"/></a:solidFill>` : '<a:noFill/>';
+  }
+  function lnXml(p, defaultStroke) {
+    const h = hex(p.stroke || defaultStroke);
+    if (!h) return '<a:ln><a:noFill/></a:ln>';
+    const w = emu(p.sw == null ? 1 : p.sw);
+    return `<a:ln w="${Math.max(w, 1)}"><a:solidFill><a:srgbClr val="${h}"/></a:solidFill>` +
+      `${p.dash ? '<a:prstDash val="dash"/>' : ''}${p.arrow ? '<a:tailEnd type="triangle" w="med" len="med"/>' : ''}</a:ln>`;
+  }
+  function xfrm(x, y, w, h, extra) {
+    return `<a:xfrm${extra || ''}><a:off x="${emu(x)}" y="${emu(y)}"/><a:ext cx="${Math.max(emu(w), 0)}" cy="${Math.max(emu(h), 0)}"/></a:xfrm>`;
+  }
+  function nv(slide, name, txBox) {
+    return `<p:nvSpPr><p:cNvPr id="${slide.id()}" name="${esc(name)}"/><p:cNvSpPr${txBox ? ' txBox="1"' : ''}/><p:nvPr/></p:nvSpPr>`;
+  }
+
+  function runXml(text, size, bold, color, fontName) {
+    const sz = Math.max(100, Math.round(size * 0.75 * 100));
+    const props = `lang="ja-JP" altLang="en-US" sz="${sz}"${bold ? ' b="1"' : ' b="0"'} dirty="0"`;
+    const font = `<a:latin typeface="${esc(fontName)}"/><a:ea typeface="${esc(fontName)}"/>`;
+    const fill = `<a:solidFill><a:srgbClr val="${hex(color) || '1F2937'}"/></a:solidFill>`;
+    if (text === '') return `<a:endParaRPr ${props}>${fill}${font}</a:endParaRPr>`;
+    return `<a:r><a:rPr ${props}>${fill}${font}</a:rPr><a:t>${esc(text)}</a:t></a:r>`;
+  }
+
+  function shapeXml(slide, p, ox, oy, R) {
+    const x = ox + (p.x || 0);
+    const y = oy + (p.y || 0);
+    switch (p.t) {
+      case 'rect':
+      case 'ellipse': {
+        let geom;
+        if (p.t === 'ellipse') geom = '<a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom>';
+        else if (p.r) {
+          const adj = Math.min(50000, Math.round((p.r / Math.max(1, Math.min(p.w, p.h))) * 100000));
+          geom = `<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val ${adj}"/></a:avLst></a:prstGeom>`;
+        } else geom = '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>';
+        return `<p:sp>${nv(slide, p.t === 'ellipse' ? '円' : '四角形')}<p:spPr>${xfrm(x, y, p.w, p.h)}${geom}${fillXml(p.fill)}${lnXml(p)}</p:spPr></p:sp>`;
+      }
+      case 'line': {
+        const x1 = ox + p.x1, y1 = oy + p.y1, x2 = ox + p.x2, y2 = oy + p.y2;
+        const flip = `${x2 < x1 ? ' flipH="1"' : ''}${y2 < y1 ? ' flipV="1"' : ''}`;
+        return `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${slide.id()}" name="線"/><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr>` +
+          `<p:spPr>${xfrm(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1), flip)}` +
+          `<a:prstGeom prst="line"><a:avLst/></a:prstGeom>${lnXml(p, R.C.ink)}</p:spPr></p:cxnSp>`;
+      }
+      case 'tri': {
+        // 二等辺三角形は上向き。回転で向きを変える（90度回転では幅と高さを入れ替える）
+        const rot = { up: 0, right: 90, down: 180, left: 270 }[p.dir || 'down'] || 0;
+        let bx = x, by = y, bw = p.w, bh = p.h;
+        if (rot === 90 || rot === 270) { bw = p.h; bh = p.w; bx = x + (p.w - bw) / 2; by = y + (p.h - bh) / 2; }
+        return `<p:sp>${nv(slide, '三角形')}<p:spPr>${xfrm(bx, by, bw, bh, rot ? ` rot="${rot * 60000}"` : '')}` +
+          `<a:prstGeom prst="triangle"><a:avLst/></a:prstGeom>${fillXml(p.fill || R.C.ink)}<a:ln><a:noFill/></a:ln></p:spPr></p:sp>`;
+      }
+      case 'text': {
+        const size = p.size || 14;
+        const algn = { left: 'l', center: 'ctr', right: 'r' }[p.align || 'left'];
+        const anchor = { top: 't', middle: 'ctr', bottom: 'b' }[p.valign || 'middle'];
+        const spc = Math.round(size * R.LINE_HEIGHT * 0.75 * 100);
+        let paras;
+        if (Array.isArray(p.runs)) {
+          const rs = p.runs.filter((r) => r && r.text != null && r.text !== '');
+          paras = `<a:p><a:pPr algn="${algn}"><a:buNone/></a:pPr>${rs.map((r) => runXml(String(r.text), r.size || 14, r.bold, r.color, R.FONT_NAME)).join('')}</a:p>`;
+        } else paras = R.fitText(p).map((line) =>
+          `<a:p><a:pPr algn="${algn}"><a:lnSpc><a:spcPts val="${spc}"/></a:lnSpc><a:buNone/></a:pPr>` +
+          `${runXml(line, size, p.bold, p.color, R.FONT_NAME)}</a:p>`).join('');
+        return `<p:sp>${nv(slide, 'テキスト', true)}<p:spPr>${xfrm(x, y, p.w, p.h)}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>` +
+          `<p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="${anchor}" rtlCol="0"><a:noAutofit/></a:bodyPr>` +
+          `<a:lstStyle/>${paras}</p:txBody></p:sp>`;
+      }
+      default:
+        return '';
+    }
+  }
+
+  function tableXml(slide, p, ox, oy, R, name) {
+    const L = R.tableLayout(p);
+    const size = p.size || 13;
+    const border = hex(p.border || R.C.line);
+    const ln = (tag) => `<a:${tag} w="${EMU}" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:srgbClr val="${border}"/></a:solidFill>` +
+      `<a:prstDash val="solid"/></a:${tag}>`;
+    const cell = (text, ci, ri) => {
+      const header = ri === 0;
+      const al = header ? (L.align[ci] === 'right' ? 'right' : 'left') : L.align[ci];
+      const algn = { left: 'l', center: 'ctr', right: 'r' }[al];
+      let fill = '<a:noFill/>';
+      if (header) fill = fillXml(p.headerFill || R.C.soft);
+      else if (p.stripe && (ri - 1) % 2 === 1) fill = fillXml(R.C.softer);
+      const color = header ? (p.headerColor || R.C.ink) : R.C.ink;
+      // 画面と同じ位置で改行・省略する
+      const lines = R.fitText({ text: text == null ? '' : String(text), size, bold: header, w: L.colW[ci] - 16, h: L.rowH, fit: 'wrap' });
+      const spc = Math.round(size * R.LINE_HEIGHT * 0.75 * 100);
+      const paras = lines.map((line) => `<a:p><a:pPr algn="${algn}"><a:lnSpc><a:spcPts val="${spc}"/></a:lnSpc><a:buNone/></a:pPr>` +
+        `${runXml(line, size, header, color, R.FONT_NAME)}</a:p>`).join('');
+      return `<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>${paras}</a:txBody>` +
+        `<a:tcPr marL="${emu(8)}" marR="${emu(8)}" marT="0" marB="0" anchor="ctr">${ln('lnL')}${ln('lnR')}${ln('lnT')}${ln('lnB')}${fill}</a:tcPr></a:tc>`;
+    };
+    const rowH = emu(L.rowH);
+    const rowsXml = [p.columns, ...p.rows].map((row, ri) =>
+      `<a:tr h="${rowH}">${p.columns.map((_, ci) => cell(row[ci], ci, ri)).join('')}</a:tr>`).join('');
+    return `<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="${slide.id()}" name="${esc(name)}"/>` +
+      `<p:cNvGraphicFramePr><a:graphicFrameLocks noGrp="1"/></p:cNvGraphicFramePr><p:nvPr/></p:nvGraphicFramePr>` +
+      `<p:xfrm><a:off x="${emu(ox + p.x)}" y="${emu(oy + p.y)}"/><a:ext cx="${emu(p.w)}" cy="${rowH * L.rowCount}"/></p:xfrm>` +
+      `<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table"><a:tbl><a:tblPr firstRow="1"/>` +
+      `<a:tblGrid>${L.colW.map((w) => `<a:gridCol w="${emu(w)}"/>`).join('')}</a:tblGrid>${rowsXml}</a:tbl></a:graphicData></a:graphic></p:graphicFrame>`;
+  }
+
+  function groupXml(slide, name, box, body) {
+    const off = `<a:off x="${emu(box.x)}" y="${emu(box.y)}"/><a:ext cx="${emu(box.w)}" cy="${emu(box.h)}"/>`;
+    const ch = `<a:chOff x="${emu(box.x)}" y="${emu(box.y)}"/><a:chExt cx="${emu(box.w)}" cy="${emu(box.h)}"/>`;
+    return `<p:grpSp><p:nvGrpSpPr><p:cNvPr id="${slide.id()}" name="${esc(name)}"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>` +
+      `<p:grpSpPr><a:xfrm>${off}${ch}</a:xfrm></p:grpSpPr>${body}</p:grpSp>`;
+  }
+
+  // 1部品分。表は PowerPoint の仕様でグループに入れられないため tables として別に返す。
+  function itemXml(slide, item, ctx, R) {
+    const def = window.GamenUI.get(item.type);
+    if (!def) return { shapes: '', tables: '' };
+    let prims = [];
+    try { prims = def.draw(item.props, item.w, item.h, ctx) || []; } catch (e) { console.error(item.type, e); return { shapes: '', tables: '' }; }
+    const label = def.name + (item.props && (item.props.label || item.props.title || item.props.text) ? `：${String(item.props.label || item.props.title || item.props.text).split('\n')[0]}` : '');
+    const tables = prims.filter((p) => p.t === 'table');
+    const shapes = prims.filter((p) => p.t !== 'table');
+    let out = '';
+    if (shapes.length === 1) out = shapeXml(slide, shapes[0], item.x, item.y, R);
+    else if (shapes.length > 1) out = groupXml(slide, label, item, shapes.map((p) => shapeXml(slide, p, item.x, item.y, R)).join(''));
+    return { shapes: out, tables: tables.map((t) => tableXml(slide, t, item.x, item.y, R, label)).join('') };
+  }
+
+  // エディタでグループ化した部品は、PowerPoint でも1つのグループにまとめる
+  function slideXml(page, ctx, R) {
+    const slide = new Slide();
+    const done = new Set();
+    let body = '';
+    page.items.forEach((it) => {
+      if (done.has(it.id)) return;
+      if (!it.group) { const x = itemXml(slide, it, ctx, R); body += x.shapes + x.tables; return; }
+      const members = page.items.filter((m) => m.group === it.group);
+      members.forEach((m) => done.add(m.id));
+      const parts = members.map((m) => itemXml(slide, m, ctx, R));
+      const inner = parts.map((x) => x.shapes).filter(Boolean);
+      const x1 = Math.min(...members.map((m) => m.x)), y1 = Math.min(...members.map((m) => m.y));
+      const x2 = Math.max(...members.map((m) => m.x + m.w)), y2 = Math.max(...members.map((m) => m.y + m.h));
+      body += inner.length > 1 ? groupXml(slide, 'グループ', { x: x1, y: y1, w: x2 - x1, h: y2 - y1 }, inner.join('')) : inner.join('');
+      body += parts.map((x) => x.tables).join('');
+    });
+    return HEAD + `<p:sld ${NS}><p:cSld name="${esc(page.name)}"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>` +
+      '<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>' +
+      `${body}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+  }
+
+  function buildFiles(doc) {
+    const R = window.GamenRender;
+    const T = window.GamenPptxTemplate;
+    const ctx = R.makeCtx(doc.theme);
+    const pages = doc.pages;
+    const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    const files = [];
+
+    const ct = '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>' +
+      '<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>' +
+      '<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>' +
+      pages.map((_, i) => `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`).join('') +
+      '<Override PartName="/ppt/presProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presProps+xml"/>' +
+      '<Override PartName="/ppt/viewProps.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.viewProps+xml"/>' +
+      '<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>' +
+      '<Override PartName="/ppt/tableStyles.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.tableStyles+xml"/>' +
+      '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
+      '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>';
+    files.push({ name: '[Content_Types].xml', data: HEAD + ct });
+
+    files.push({ name: '_rels/.rels', data: HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      `<Relationship Id="rId1" Type="${REL}/officeDocument" Target="ppt/presentation.xml"/>` +
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
+      `<Relationship Id="rId3" Type="${REL}/extended-properties" Target="docProps/app.xml"/></Relationships>` });
+
+    files.push({ name: 'docProps/core.xml', data: HEAD + '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ' +
+      'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" ' +
+      'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+      `<dc:title>${esc(doc.title || '画面イメージ')}</dc:title><dc:creator>画面イメージエディタ</dc:creator><cp:revision>1</cp:revision>` +
+      `<dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified></cp:coreProperties>` });
+
+    files.push({ name: 'docProps/app.xml', data: HEAD + '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" ' +
+      'xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
+      `<Application>Microsoft Office PowerPoint</Application><Slides>${pages.length}</Slides><AppVersion>16.0000</AppVersion></Properties>` });
+
+    const sldIds = pages.map((_, i) => `<p:sldId id="${256 + i}" r:id="rId${10 + i}"/>`).join('');
+    files.push({ name: 'ppt/presentation.xml', data: HEAD + `<p:presentation ${NS} saveSubsetFonts="1">` +
+      '<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>' +
+      `<p:sldIdLst>${sldIds}</p:sldIdLst>` +
+      `<p:sldSz cx="${emu(doc.size.w)}" cy="${emu(doc.size.h)}"/><p:notesSz cx="6858000" cy="9144000"/>` +
+      '<p:defaultTextStyle><a:lvl1pPr marL="0" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1">' +
+      '<a:defRPr sz="1800" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr>' +
+      '</a:lvl1pPr></p:defaultTextStyle></p:presentation>' });
+
+    files.push({ name: 'ppt/_rels/presentation.xml.rels', data: HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      `<Relationship Id="rId1" Type="${REL}/slideMaster" Target="slideMasters/slideMaster1.xml"/>` +
+      `<Relationship Id="rId2" Type="${REL}/presProps" Target="presProps.xml"/>` +
+      `<Relationship Id="rId3" Type="${REL}/viewProps" Target="viewProps.xml"/>` +
+      `<Relationship Id="rId4" Type="${REL}/theme" Target="theme/theme1.xml"/>` +
+      `<Relationship Id="rId5" Type="${REL}/tableStyles" Target="tableStyles.xml"/>` +
+      pages.map((_, i) => `<Relationship Id="rId${10 + i}" Type="${REL}/slide" Target="slides/slide${i + 1}.xml"/>`).join('') +
+      '</Relationships>' });
+
+    files.push({ name: 'ppt/presProps.xml', data: HEAD + `<p:presentationPr ${NS}/>` });
+    files.push({ name: 'ppt/viewProps.xml', data: HEAD + `<p:viewPr ${NS}><p:normalViewPr><p:restoredLeft sz="15620"/><p:restoredTop sz="94660"/></p:normalViewPr><p:gridSpacing cx="76200" cy="76200"/></p:viewPr>` });
+    files.push({ name: 'ppt/tableStyles.xml', data: HEAD + '<a:tblStyleLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" def="{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}"/>' });
+
+    files.push({ name: 'ppt/slideMasters/slideMaster1.xml', data: T.master });
+    files.push({ name: 'ppt/slideMasters/_rels/slideMaster1.xml.rels', data: HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      `<Relationship Id="rId1" Type="${REL}/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>` +
+      `<Relationship Id="rId2" Type="${REL}/theme" Target="../theme/theme1.xml"/></Relationships>` });
+    files.push({ name: 'ppt/slideLayouts/slideLayout1.xml', data: T.layout });
+    files.push({ name: 'ppt/slideLayouts/_rels/slideLayout1.xml.rels', data: HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      `<Relationship Id="rId1" Type="${REL}/slideMaster" Target="../slideMasters/slideMaster1.xml"/></Relationships>` });
+    files.push({ name: 'ppt/theme/theme1.xml', data: T.theme });
+
+    pages.forEach((page, i) => {
+      files.push({ name: `ppt/slides/slide${i + 1}.xml`, data: slideXml(page, ctx, R) });
+      files.push({ name: `ppt/slides/_rels/slide${i + 1}.xml.rels`, data: HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        `<Relationship Id="rId1" Type="${REL}/slideLayout" Target="../slideLayouts/slideLayout1.xml"/></Relationships>` });
+    });
+    return files;
+  }
+
+  function build(doc) {
+    const blob = window.GamenZip.makeZip(buildFiles(doc));
+    return new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+  }
+
+  window.GamenPptx = { build, buildFiles };
+})();
+
+</script>
+
+<!-- 部品（増やすときはここに1行追加） -->
+<script>/* components/_shared.js */
+/*
+ * 部品どうしで共通に使う描画パーツ。
+ * 新しい部品を作るときも、ここの関数を使うと見た目を揃えやすい。
+ */
+(function () {
+  'use strict';
+
+  // ラベル付き入力欄の外枠。{ prims, box } を返し、box は入力欄部分の位置。
+  function field(p, w, h, ctx, opt) {
+    const C = ctx.C;
+    const out = [];
+    const label = String(p.label || '');
+    const top = p.labelPos === 'top';
+    let box;
+    if (label && top) {
+      out.push({ t: 'text', x: 0, y: 0, w, h: 22, text: label, size: 13, bold: true, color: C.ink, valign: 'top', fit: 'ellipsis' });
+      box = { x: 0, y: 26, w, h: h - 26 };
+    } else if (label && Number(p.labelWidth) > 0) {
+      const lw = Number(p.labelWidth);
+      // 必須マークはラベル欄の右端に揃えて置く（ラベルが長くても入力欄に重ならない）
+      out.push({ t: 'text', x: 0, y: 0, w: lw - 12 - (p.required ? 40 : 0), h: opt && opt.labelTop ? 38 : h, text: label, size: 14, bold: true, color: C.ink, fit: 'wrap' });
+      box = { x: lw, y: 0, w: w - lw, h };
+    } else {
+      box = { x: 0, y: 0, w, h };
+    }
+    if (label && p.required && (top || Number(p.labelWidth) > 0)) {
+      const bx = top ? Math.min(ctx.measure(label, 13, true), w - 40) + 8 : Number(p.labelWidth) - 12 - 32;
+      const by = top ? 2 : (opt && opt.labelTop ? 19 : h / 2) - 9;
+      out.push({ t: 'rect', x: bx, y: by, w: 32, h: 18, r: 3, fill: C.danger });
+      out.push({ t: 'text', x: bx, y: by, w: 32, h: 18, text: '必須', size: 11, bold: true, color: '#FFFFFF', align: 'center' });
+    }
+    out.push({ t: 'rect', ...box, r: 4, fill: p.disabled ? C.soft : C.paper, stroke: C.line });
+    return { prims: out, box };
+  }
+
+  // 入力欄の中の文字（値があれば値、なければ薄いプレースホルダー）
+  function fieldText(p, box, ctx, rightPad, valign) {
+    const has = p.value != null && String(p.value) !== '';
+    return {
+      t: 'text', x: box.x + 12, y: box.y + (valign === 'top' ? 10 : 0), w: box.w - 24 - (rightPad || 0),
+      h: valign === 'top' ? box.h - 20 : box.h, valign: valign || 'middle',
+      text: has ? p.value : (p.placeholder || ''), size: 14, color: has ? ctx.C.ink : ctx.C.faint, fit: valign === 'top' ? 'wrap' : 'ellipsis',
+    };
+  }
+
+  // チェックボックス・ラジオの並び
+  function choices(p, w, h, ctx, mark) {
+    const C = ctx.C;
+    const opts = ctx.list(p.options);
+    const out = [];
+    const vertical = p.direction === 'vertical';
+    let x = 0, y = 0;
+    const rowH = vertical ? Math.max(24, Math.min(36, h / Math.max(1, opts.length))) : h;
+    opts.forEach((o, i) => {
+      const cy = vertical ? y + rowH / 2 : h / 2;
+      out.push(...mark(x, cy - 9, i));
+      const tw = ctx.measure(o, 14, false);
+      out.push({ t: 'text', x: x + 26, y: cy - 12, w: tw + 4, h: 24, text: o, size: 14, color: C.ink });
+      if (vertical) y += rowH; else x += 26 + tw + 28;
+    });
+    return out;
+  }
+
+  window.GamenParts = { field, fieldText, choices };
+})();
+
+</script>
+<script>/* components/layout.js */
+/* レイアウト系の部品：ヘッダー、サイドメニュー、グループ枠、ダイアログ、区切り線 */
+(function () {
+  'use strict';
+  const { register } = window.GamenUI;
+
+  register({
+    type: 'header',
+    name: 'ヘッダー',
+    category: 'レイアウト',
+    size: { w: 1280, h: 56 },
+    props: [
+      { key: 'title', label: 'システム名', type: 'text', default: '顧客管理システム' },
+      { key: 'user', label: 'ログインユーザー', type: 'text', default: '営業部　山田 太郎' },
+      { key: 'logout', label: 'ログアウトボタン', type: 'bool', default: true },
+      { key: 'color', label: '背景色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const bg = ctx.color(p.color);
+      const fg = ctx.onColor(bg);
+      const out = [{ t: 'rect', x: 0, y: 0, w, h, fill: bg }];
+      const mark = Math.min(30, h - 16);
+      out.push({ t: 'rect', x: 20, y: (h - mark) / 2, w: mark, h: mark, r: 6, fill: fg === '#FFFFFF' ? ctx.tint(bg, 0.2) : ctx.shade(bg, 0.12) });
+      out.push({ t: 'text', x: 20, y: (h - mark) / 2, w: mark, h: mark, text: String(p.title || ' ').trim().charAt(0), size: 15, bold: true, color: fg, align: 'center' });
+      out.push({ t: 'text', x: 20 + mark + 12, y: 0, w: w / 2, h, text: p.title, size: 18, bold: true, color: fg, fit: 'ellipsis' });
+      let right = w - 20;
+      if (p.logout) {
+        out.push({ t: 'rect', x: right - 96, y: (h - 32) / 2, w: 96, h: 32, r: 4, stroke: fg, sw: 1 });
+        out.push({ t: 'text', x: right - 96, y: (h - 32) / 2, w: 96, h: 32, text: 'ログアウト', size: 13, color: fg, align: 'center' });
+        right -= 96 + 20;
+      }
+      if (p.user) out.push({ t: 'text', x: right - 360, y: 0, w: 360, h, text: p.user, size: 13, color: fg, align: 'right', fit: 'ellipsis' });
+      return out;
+    },
+  });
+
+  register({
+    type: 'sidemenu',
+    name: 'サイドメニュー',
+    category: 'レイアウト',
+    size: { w: 220, h: 664 },
+    props: [
+      { key: 'items', label: 'メニュー（1行に1つ）', type: 'textarea', default: 'ホーム\n顧客検索\n顧客登録\n口座照会\n取引履歴\n帳票出力\n設定' },
+      { key: 'active', label: '選択中の番号', type: 'number', default: 2, min: 0 },
+      { key: 'color', label: '強調色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      const out = [{ t: 'rect', x: 0, y: 0, w, h, fill: C.softer }, { t: 'line', x1: w, y1: 0, x2: w, y2: h, stroke: C.lineSoft }];
+      ctx.lines(p.items).forEach((it, i) => {
+        const y = 12 + i * 44;
+        const on = i + 1 === Number(p.active);
+        if (on) {
+          out.push({ t: 'rect', x: 8, y, w: w - 16, h: 40, r: 6, fill: ctx.tint(c, 0.86) });
+          out.push({ t: 'rect', x: 8, y: y + 8, w: 4, h: 24, r: 2, fill: c });
+        }
+        out.push({ t: 'text', x: 28, y, w: w - 40, h: 40, text: it, size: 14, bold: on, color: on ? ctx.shade(c, 0.15) : '#334155', fit: 'ellipsis' });
+      });
+      return out;
+    },
+  });
+
+  register({
+    type: 'panel',
+    name: 'グループ枠',
+    category: 'レイアウト',
+    size: { w: 560, h: 240 },
+    props: [
+      { key: 'title', label: '見出し', type: 'text', default: '検索条件' },
+      { key: 'fill', label: '背景色', type: 'color', default: '#FFFFFF' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const out = [{ t: 'rect', x: 0, y: 0, w, h, r: 6, fill: p.fill || C.paper, stroke: C.line }];
+      if (p.title) {
+        out.push({ t: 'rect', x: 1, y: 1, w: w - 2, h: 40, r: 5, fill: C.softer });
+        out.push({ t: 'rect', x: 1, y: 20, w: w - 2, h: 21, fill: C.softer });
+        out.push({ t: 'line', x1: 0, y1: 41, x2: w, y2: 41, stroke: C.line });
+        out.push({ t: 'text', x: 16, y: 1, w: w - 32, h: 40, text: p.title, size: 15, bold: true, color: C.ink, fit: 'ellipsis' });
+      }
+      return out;
+    },
+  });
+
+  register({
+    type: 'dialog',
+    name: 'ダイアログ',
+    category: 'レイアウト',
+    size: { w: 440, h: 220 },
+    props: [
+      { key: 'title', label: 'タイトル', type: 'text', default: '登録の確認' },
+      { key: 'message', label: 'メッセージ', type: 'textarea', default: '入力した内容で顧客情報を登録します。\nよろしいですか？' },
+      { key: 'buttons', label: 'ボタン（カンマ区切り）', type: 'text', default: 'キャンセル,登録する' },
+      { key: 'color', label: '強調色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      const out = [
+        { t: 'rect', x: 4, y: 6, w, h, r: 8, fill: '#D5DCE5' },
+        { t: 'rect', x: 0, y: 0, w, h, r: 8, fill: C.paper, stroke: C.line },
+        { t: 'text', x: 24, y: 0, w: w - 72, h: 52, text: p.title, size: 16, bold: true, color: C.ink, fit: 'ellipsis' },
+        { t: 'line', x1: w - 38, y1: 20, x2: w - 26, y2: 32, stroke: C.sub, sw: 1.5 },
+        { t: 'line', x1: w - 26, y1: 20, x2: w - 38, y2: 32, stroke: C.sub, sw: 1.5 },
+        { t: 'line', x1: 0, y1: 52, x2: w, y2: 52, stroke: C.lineSoft },
+        { t: 'text', x: 24, y: 68, w: w - 48, h: h - 140, text: p.message, size: 14, color: C.ink, valign: 'top', fit: 'wrap' },
+        { t: 'line', x1: 0, y1: h - 64, x2: w, y2: h - 64, stroke: C.lineSoft },
+      ];
+      const btns = ctx.list(p.buttons);
+      let x = w - 20;
+      btns.slice().reverse().forEach((b, ri) => {
+        const bw = Math.max(96, ctx.measure(b, 14, true) + 36);
+        x -= bw;
+        const main = ri === 0;
+        out.push({ t: 'rect', x, y: h - 50, w: bw, h: 36, r: 6, fill: main ? c : C.paper, stroke: main ? null : C.line });
+        out.push({ t: 'text', x, y: h - 50, w: bw, h: 36, text: b, size: 14, bold: main, color: main ? ctx.onColor(c) : C.ink, align: 'center' });
+        x -= 12;
+      });
+      return out;
+    },
+  });
+
+  register({
+    type: 'divider',
+    name: '区切り線',
+    category: 'レイアウト',
+    size: { w: 400, h: 16 },
+    props: [
+      { key: 'color', label: '色', type: 'color', default: '#CBD5E1' },
+      { key: 'width', label: '太さ', type: 'number', default: 1, min: 0.5, max: 8, step: 0.5 },
+      { key: 'dash', label: '破線', type: 'bool', default: false },
+    ],
+    draw(p, w, h, ctx) {
+      const s = { stroke: p.color || ctx.C.line, sw: Number(p.width) || 1, dash: p.dash };
+      return h > w ? [{ t: 'line', x1: w / 2, y1: 0, x2: w / 2, y2: h, ...s }] : [{ t: 'line', x1: 0, y1: h / 2, x2: w, y2: h / 2, ...s }];
+    },
+  });
+})();
+
+</script>
+<script>/* components/input.js */
+/* 入力系の部品：ボタン、テキスト入力、プルダウン、日付、テキストエリア、検索ボックス、チェックボックス、ラジオ、トグル */
+(function () {
+  'use strict';
+  const { register } = window.GamenUI;
+  const { field, fieldText, choices } = window.GamenParts;
+
+  // ラベル付き入力欄に共通のプロパティ
+  const FIELD_PROPS = (label, placeholder) => [
+    { key: 'label', label: 'ラベル', type: 'text', default: label },
+    { key: 'labelPos', label: 'ラベルの位置', type: 'select', default: 'left', options: [['left', '左'], ['top', '上']] },
+    { key: 'labelWidth', label: 'ラベル幅（左のとき）', type: 'number', default: 120, min: 0 },
+    { key: 'placeholder', label: 'プレースホルダー', type: 'text', default: placeholder },
+    { key: 'value', label: '入力値', type: 'text', default: '' },
+    { key: 'required', label: '必須マーク', type: 'bool', default: false },
+    { key: 'disabled', label: '入力不可（灰色）', type: 'bool', default: false },
+  ];
+
+  register({
+    type: 'button',
+    name: 'ボタン',
+    category: '入力',
+    size: { w: 120, h: 40 },
+    props: [
+      { key: 'label', label: '表示文字', type: 'text', default: '検索' },
+      {
+        key: 'variant', label: '種類', type: 'select', default: 'primary',
+        options: [['primary', 'メイン（塗り）'], ['secondary', 'サブ（白）'], ['outline', '枠線'], ['danger', '危険（赤）'], ['link', 'リンク風']],
+      },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = p.variant === 'danger' ? C.danger : ctx.color(p.color);
+      const st = {
+        primary: { fill: c, text: ctx.onColor(c), bold: true },
+        danger: { fill: c, text: '#FFFFFF', bold: true },
+        secondary: { fill: C.paper, stroke: C.line, text: C.ink },
+        outline: { fill: C.paper, stroke: c, text: c, bold: true },
+        link: { text: c },
+      }[p.variant] || { fill: c, text: '#FFFFFF' };
+      const out = [];
+      if (st.fill || st.stroke) out.push({ t: 'rect', x: 0, y: 0, w, h, r: 6, fill: st.fill, stroke: st.stroke });
+      out.push({ t: 'text', x: 0, y: 0, w, h, text: p.label, size: 14, bold: st.bold, color: st.text, align: 'center', fit: 'ellipsis' });
+      if (p.variant === 'link') {
+        const tw = Math.min(w, ctx.measure(p.label, 14, false));
+        out.push({ t: 'line', x1: (w - tw) / 2, y1: h / 2 + 11, x2: (w + tw) / 2, y2: h / 2 + 11, stroke: c });
+      }
+      return out;
+    },
+  });
+
+  register({
+    type: 'input',
+    name: 'テキスト入力',
+    category: '入力',
+    size: { w: 400, h: 40 },
+    props: FIELD_PROPS('氏名（カナ）', '例）ヤマダ タロウ'),
+    draw(p, w, h, ctx) {
+      const f = field(p, w, h, ctx);
+      return [...f.prims, fieldText(p, f.box, ctx)];
+    },
+  });
+
+  register({
+    type: 'select',
+    name: 'プルダウン',
+    category: '入力',
+    size: { w: 400, h: 40 },
+    props: FIELD_PROPS('店舗', '選択してください'),
+    draw(p, w, h, ctx) {
+      const f = field(p, w, h, ctx);
+      const b = f.box;
+      return [...f.prims, fieldText(p, b, ctx, 20),
+        { t: 'tri', x: b.x + b.w - 26, y: b.y + b.h / 2 - 3, w: 11, h: 6, fill: ctx.C.sub, dir: 'down' }];
+    },
+  });
+
+  register({
+    type: 'date',
+    name: '日付入力',
+    category: '入力',
+    size: { w: 320, h: 40 },
+    props: FIELD_PROPS('取引日', 'YYYY/MM/DD'),
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const f = field(p, w, h, ctx);
+      const b = f.box;
+      const ix = b.x + b.w - 32, iy = b.y + b.h / 2 - 8;
+      return [...f.prims, fieldText(p, b, ctx, 24),
+        { t: 'rect', x: ix, y: iy, w: 18, h: 17, r: 2, stroke: C.sub, sw: 1.3 },
+        { t: 'line', x1: ix, y1: iy + 5, x2: ix + 18, y2: iy + 5, stroke: C.sub, sw: 1.3 },
+        { t: 'line', x1: ix + 5, y1: iy - 2, x2: ix + 5, y2: iy + 2, stroke: C.sub, sw: 1.3 },
+        { t: 'line', x1: ix + 13, y1: iy - 2, x2: ix + 13, y2: iy + 2, stroke: C.sub, sw: 1.3 }];
+    },
+  });
+
+  register({
+    type: 'textarea',
+    name: 'テキストエリア',
+    category: '入力',
+    size: { w: 560, h: 112 },
+    props: FIELD_PROPS('備考', '自由に入力できます（最大500文字）'),
+    draw(p, w, h, ctx) {
+      const f = field(p, w, h, ctx, { labelTop: true });
+      return [...f.prims, fieldText(p, f.box, ctx, 0, 'top')];
+    },
+  });
+
+  register({
+    type: 'search',
+    name: '検索ボックス',
+    category: '入力',
+    size: { w: 320, h: 40 },
+    props: [
+      { key: 'placeholder', label: 'プレースホルダー', type: 'text', default: '顧客番号・氏名で検索' },
+      { key: 'value', label: '入力値', type: 'text', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const cy = h / 2;
+      return [
+        { t: 'rect', x: 0, y: 0, w, h, r: h / 2, fill: C.paper, stroke: C.line },
+        { t: 'ellipse', x: 16, y: cy - 8, w: 12, h: 12, stroke: C.sub, sw: 1.6 },
+        { t: 'line', x1: 26, y1: cy + 2, x2: 31, y2: cy + 7, stroke: C.sub, sw: 1.6 },
+        fieldText({ ...p }, { x: 30, y: 0, w: w - 40, h }, ctx),
+      ];
+    },
+  });
+
+  register({
+    type: 'checkbox',
+    name: 'チェックボックス',
+    category: '入力',
+    size: { w: 320, h: 32 },
+    props: [
+      { key: 'options', label: '選択肢（カンマ区切り）', type: 'text', default: 'メール,電話,郵送' },
+      { key: 'checked', label: 'チェック済みの番号（例：1,3）', type: 'text', default: '1' },
+      { key: 'direction', label: '並び', type: 'select', default: 'horizontal', options: [['horizontal', '横'], ['vertical', '縦']] },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      const on = ctx.list(p.checked).map(Number);
+      return choices(p, w, h, ctx, (x, y, i) => {
+        if (!on.includes(i + 1)) return [{ t: 'rect', x, y, w: 18, h: 18, r: 3, fill: C.paper, stroke: C.faint, sw: 1.5 }];
+        return [
+          { t: 'rect', x, y, w: 18, h: 18, r: 3, fill: c },
+          { t: 'line', x1: x + 4.5, y1: y + 9.5, x2: x + 7.5, y2: y + 12.5, stroke: '#FFFFFF', sw: 2 },
+          { t: 'line', x1: x + 7.5, y1: y + 12.5, x2: x + 13.5, y2: y + 5.5, stroke: '#FFFFFF', sw: 2 },
+        ];
+      });
+    },
+  });
+
+  register({
+    type: 'radio',
+    name: 'ラジオボタン',
+    category: '入力',
+    size: { w: 240, h: 32 },
+    props: [
+      { key: 'options', label: '選択肢（カンマ区切り）', type: 'text', default: '個人,法人' },
+      { key: 'selected', label: '選択中の番号', type: 'number', default: 1, min: 0 },
+      { key: 'direction', label: '並び', type: 'select', default: 'horizontal', options: [['horizontal', '横'], ['vertical', '縦']] },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      return choices(p, w, h, ctx, (x, y, i) => (i + 1 === Number(p.selected)
+        ? [{ t: 'ellipse', x, y, w: 18, h: 18, fill: C.paper, stroke: c, sw: 1.5 }, { t: 'ellipse', x: x + 4.5, y: y + 4.5, w: 9, h: 9, fill: c }]
+        : [{ t: 'ellipse', x, y, w: 18, h: 18, fill: C.paper, stroke: C.faint, sw: 1.5 }]));
+    },
+  });
+
+  register({
+    type: 'toggle',
+    name: 'トグルスイッチ',
+    category: '入力',
+    size: { w: 200, h: 32 },
+    props: [
+      { key: 'label', label: 'ラベル', type: 'text', default: '通知を受け取る' },
+      { key: 'on', label: 'オン', type: 'bool', default: true },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      const y = h / 2 - 11;
+      return [
+        { t: 'rect', x: 0, y, w: 40, h: 22, r: 11, fill: p.on ? c : C.line },
+        { t: 'ellipse', x: p.on ? 20 : 2, y: y + 2, w: 18, h: 18, fill: '#FFFFFF' },
+        { t: 'text', x: 52, y: 0, w: w - 52, h, text: p.label, size: 14, color: C.ink, fit: 'ellipsis' },
+      ];
+    },
+  });
+})();
+
+</script>
+<script>/* components/display.js */
+/* 表示系の部品：見出し、テキスト、表、タブ、パンくず、ページ送り、ステータス、メッセージ、数値カード、画像 */
+(function () {
+  'use strict';
+  const { register } = window.GamenUI;
+
+  register({
+    type: 'heading',
+    name: '見出し',
+    category: '表示',
+    size: { w: 480, h: 40 },
+    props: [
+      { key: 'text', label: '文字', type: 'text', default: '顧客検索' },
+      { key: 'size', label: '文字サイズ(px)', type: 'number', default: 22, min: 8, max: 72 },
+      { key: 'style', label: '装飾', type: 'select', default: 'bar', options: [['bar', '左に色帯'], ['underline', '下線'], ['none', 'なし']] },
+      { key: 'color', label: '装飾の色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const c = ctx.color(p.color);
+      const size = Number(p.size) || 22;
+      const out = [];
+      let x = 0;
+      if (p.style === 'bar') { out.push({ t: 'rect', x: 0, y: (h - size * 1.2) / 2, w: 5, h: size * 1.2, r: 2, fill: c }); x = 16; }
+      out.push({ t: 'text', x, y: 0, w: w - x, h, text: p.text, size, bold: true, color: ctx.C.ink, fit: 'ellipsis' });
+      if (p.style === 'underline') out.push({ t: 'line', x1: 0, y1: h - 1, x2: w, y2: h - 1, stroke: c, sw: 2 });
+      return out;
+    },
+  });
+
+  register({
+    type: 'text',
+    name: 'テキスト',
+    category: '表示',
+    size: { w: 320, h: 28 },
+    props: [
+      { key: 'text', label: '文字', type: 'textarea', default: '検索条件を入力して「検索」を押してください。' },
+      { key: 'size', label: '文字サイズ(px)', type: 'number', default: 14, min: 8, max: 72 },
+      { key: 'bold', label: '太字', type: 'bool', default: false },
+      { key: 'align', label: '横位置', type: 'select', default: 'left', options: [['left', '左'], ['center', '中央'], ['right', '右']] },
+      { key: 'valign', label: '縦位置', type: 'select', default: 'middle', options: [['top', '上'], ['middle', '中央'], ['bottom', '下']] },
+      { key: 'fit', label: '枠に収まらないとき', type: 'select', default: 'wrap', options: [['wrap', '折り返して、残りは「…」'], ['ellipsis', '折り返さずに「…」'], ['none', 'そのまま（はみ出す）']] },
+      { key: 'color', label: '文字色', type: 'color', default: '#1F2937' },
+    ],
+    draw(p, w, h, ctx) {
+      return [{ t: 'text', x: 0, y: 0, w, h, text: p.text, size: Number(p.size) || 14, bold: p.bold, color: p.color || ctx.C.ink, align: p.align, valign: p.valign, fit: p.fit === 'none' ? null : (p.fit || 'wrap') }];
+    },
+  });
+
+  register({
+    type: 'table',
+    name: '表',
+    category: '表示',
+    size: { w: 800, h: 252 },
+    props: [
+      { key: 'columns', label: '列見出し（カンマ区切り）', type: 'text', default: '顧客番号,氏名,店舗,口座種別,残高' },
+      { key: 'rows', label: 'データ（1行に1件、カンマ区切り）', type: 'textarea',
+        default: '0012345,山田 太郎,本店営業部,普通預金,1,250,000\n0012388,佐藤 花子,駅前支店,定期預金,3,000,000\n0013021,鈴木 一郎,本店営業部,普通預金,84,320\n0013457,高橋 美咲,北町支店,当座預金,12,600,000\n0014002,田中 健,駅前支店,普通預金,507,000\n0014519,伊藤 由美,本店営業部,定期預金,2,000,000' },
+      { key: 'widths', label: '列幅の比率（例：2,3,2,2,2）', type: 'text', default: '2,2.4,2.4,2,2.2' },
+      { key: 'header', label: '見出し行の色', type: 'select', default: 'soft', options: [['soft', '淡い色'], ['solid', '濃い色'], ['gray', '灰色']] },
+      { key: 'stripe', label: '1行おきに色を付ける', type: 'bool', default: true },
+      { key: 'size', label: '文字サイズ(px)', type: 'number', default: 13, min: 8, max: 32 },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const c = ctx.color(p.color);
+      const columns = ctx.list(p.columns);
+      // Excel からの貼り付け（タブ区切り）にも対応。
+      // カンマ区切りで「1,250,000」のように列数より多くなった場合は、余りを最後の列にまとめる。
+      const rows = String(p.rows || '').split(/\r?\n/).filter((l) => l.trim() !== '').map((line) => {
+        if (line.includes('\t')) return line.split('\t').map((s) => s.trim());
+        const cells = line.split(/[,、，]/).map((s) => s.trim());
+        if (cells.length > columns.length && columns.length > 0) {
+          const head = cells.slice(0, columns.length - 1);
+          return [...head, cells.slice(columns.length - 1).join(',')];
+        }
+        return cells;
+      });
+      const header = {
+        soft: { fill: ctx.tint(c, 0.88), color: ctx.shade(c, 0.35) },
+        solid: { fill: c, color: ctx.onColor(c) },
+        gray: { fill: ctx.C.soft, color: ctx.C.ink },
+      }[p.header] || { fill: ctx.C.soft, color: ctx.C.ink };
+      return [{
+        t: 'table', x: 0, y: 0, w, h, columns: columns.length ? columns : [' '], rows,
+        colRatios: ctx.list(p.widths), size: Number(p.size) || 13,
+        headerFill: header.fill, headerColor: header.color, stripe: p.stripe,
+      }];
+    },
+  });
+
+  register({
+    type: 'tabs',
+    name: 'タブ',
+    category: '表示',
+    size: { w: 640, h: 44 },
+    props: [
+      { key: 'tabs', label: 'タブ（カンマ区切り）', type: 'text', default: '基本情報,口座情報,取引履歴,対応メモ' },
+      { key: 'active', label: '選択中の番号', type: 'number', default: 1, min: 0 },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      const out = [{ t: 'line', x1: 0, y1: h - 1, x2: w, y2: h - 1, stroke: C.line }];
+      let x = 0;
+      ctx.list(p.tabs).forEach((t, i) => {
+        const on = i + 1 === Number(p.active);
+        const tw = ctx.measure(t, 14, true) + 40;
+        out.push({ t: 'text', x, y: 0, w: tw, h: h - 3, text: t, size: 14, bold: on, color: on ? c : C.sub, align: 'center' });
+        if (on) out.push({ t: 'rect', x, y: h - 3, w: tw, h: 3, fill: c });
+        x += tw;
+      });
+      return out;
+    },
+  });
+
+  register({
+    type: 'breadcrumb',
+    name: 'パンくずリスト',
+    category: '表示',
+    size: { w: 480, h: 24 },
+    props: [
+      { key: 'items', label: '階層（カンマ区切り）', type: 'text', default: 'ホーム,顧客管理,顧客検索' },
+      { key: 'color', label: 'リンク色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      const items = ctx.list(p.items);
+      const out = [];
+      let x = 0;
+      items.forEach((it, i) => {
+        const last = i === items.length - 1;
+        const tw = ctx.measure(it, 13, last);
+        out.push({ t: 'text', x, y: 0, w: tw + 2, h, text: it, size: 13, bold: last, color: last ? C.ink : c });
+        x += tw + 10;
+        if (!last) {
+          out.push({ t: 'line', x1: x, y1: h / 2 - 4, x2: x + 4, y2: h / 2, stroke: C.faint, sw: 1.4 });
+          out.push({ t: 'line', x1: x + 4, y1: h / 2, x2: x, y2: h / 2 + 4, stroke: C.faint, sw: 1.4 });
+          x += 16;
+        }
+      });
+      return out;
+    },
+  });
+
+  register({
+    type: 'pagination',
+    name: 'ページ送り',
+    category: '表示',
+    size: { w: 360, h: 32 },
+    props: [
+      { key: 'total', label: '総件数の表示', type: 'text', default: '全 128 件' },
+      { key: 'pages', label: 'ページ数', type: 'number', default: 5, min: 1, max: 9 },
+      { key: 'current', label: '現在のページ', type: 'number', default: 1, min: 1 },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      const out = [];
+      const s = Math.min(h, 32);
+      const y = (h - s) / 2;
+      const n = Math.max(1, Math.min(9, Number(p.pages) || 1));
+      const labels = ['‹', ...Array.from({ length: n }, (_, i) => String(i + 1)), '›'];
+      let x = w - labels.length * (s + 6) + 6;
+      if (p.total) out.push({ t: 'text', x: 0, y: 0, w: Math.max(0, x - 12), h, text: p.total, size: 13, color: C.sub, fit: 'ellipsis' });
+      labels.forEach((l) => {
+        const on = l === String(p.current);
+        out.push({ t: 'rect', x, y, w: s, h: s, r: 6, fill: on ? c : C.paper, stroke: on ? null : C.line });
+        out.push({ t: 'text', x, y, w: s, h: s, text: l, size: 13, bold: on, color: on ? ctx.onColor(c) : C.ink, align: 'center' });
+        x += s + 6;
+      });
+      return out;
+    },
+  });
+
+  const TONES = {
+    success: { label: '成功（緑）', fg: '#15803D', bg: '#DCFCE7', bd: '#86EFAC' },
+    info: { label: '情報（青）', fg: '#1D4ED8', bg: '#DBEAFE', bd: '#93C5FD' },
+    warning: { label: '注意（黄）', fg: '#B45309', bg: '#FEF3C7', bd: '#FCD34D' },
+    danger: { label: 'エラー（赤）', fg: '#B91C1C', bg: '#FEE2E2', bd: '#FCA5A5' },
+    neutral: { label: '中立（灰）', fg: '#475569', bg: '#F1F5F9', bd: '#CBD5E1' },
+  };
+  const TONE_OPTIONS = Object.keys(TONES).map((k) => [k, TONES[k].label]);
+
+  register({
+    type: 'badge',
+    name: 'ステータス',
+    category: '表示',
+    size: { w: 80, h: 26 },
+    props: [
+      { key: 'text', label: '文字', type: 'text', default: '承認済' },
+      { key: 'tone', label: '種類', type: 'select', default: 'success', options: TONE_OPTIONS },
+    ],
+    draw(p, w, h) {
+      const t = TONES[p.tone] || TONES.neutral;
+      return [{ t: 'rect', x: 0, y: 0, w, h, r: h / 2, fill: t.bg }, { t: 'text', x: 0, y: 0, w, h, text: p.text, size: 12, bold: true, color: t.fg, align: 'center', fit: 'ellipsis' }];
+    },
+  });
+
+  register({
+    type: 'alert',
+    name: 'メッセージ',
+    category: '表示',
+    size: { w: 640, h: 48 },
+    props: [
+      { key: 'text', label: '文字', type: 'textarea', default: '顧客番号は7桁の数字で入力してください。' },
+      { key: 'tone', label: '種類', type: 'select', default: 'danger', options: TONE_OPTIONS },
+    ],
+    draw(p, w, h) {
+      const t = TONES[p.tone] || TONES.info;
+      const mark = { success: '✓', info: 'i', warning: '!', danger: '!', neutral: 'i' }[p.tone] || 'i';
+      return [
+        { t: 'rect', x: 0, y: 0, w, h, r: 6, fill: t.bg, stroke: t.bd },
+        { t: 'ellipse', x: 14, y: h / 2 - 10, w: 20, h: 20, fill: t.fg },
+        { t: 'text', x: 14, y: h / 2 - 10, w: 20, h: 20, text: mark, size: 13, bold: true, color: '#FFFFFF', align: 'center' },
+        { t: 'text', x: 46, y: 0, w: w - 60, h, text: p.text, size: 14, color: t.fg, fit: 'wrap' },
+      ];
+    },
+  });
+
+  register({
+    type: 'stat',
+    name: '数値カード',
+    category: '表示',
+    size: { w: 240, h: 104 },
+    props: [
+      { key: 'label', label: '項目名', type: 'text', default: '本日の受付件数' },
+      { key: 'value', label: '数値', type: 'text', default: '1,284' },
+      { key: 'unit', label: '単位', type: 'text', default: '件' },
+      { key: 'note', label: '補足', type: 'text', default: '前日比 +12.4%' },
+      { key: 'color', label: '色', type: 'color', default: '' },
+    ],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      const c = ctx.color(p.color);
+      return [
+        { t: 'rect', x: 0, y: 0, w, h, r: 8, fill: C.paper, stroke: C.line },
+        { t: 'text', x: 18, y: 14, w: w - 36, h: 20, text: p.label, size: 13, color: C.sub, fit: 'ellipsis' },
+        { t: 'text', x: 18, y: 36, w: w - 36, h: 40, runs: [
+          { text: p.value, size: 30, bold: true, color: C.ink },
+          { text: p.unit ? ' ' + p.unit : '', size: 14, color: C.sub },
+        ] },
+        { t: 'text', x: 18, y: h - 30, w: w - 36, h: 18, text: p.note, size: 12, bold: true, color: c, fit: 'ellipsis' },
+      ];
+    },
+  });
+
+  register({
+    type: 'image',
+    name: '画像（仮置き）',
+    category: '表示',
+    size: { w: 240, h: 160 },
+    props: [{ key: 'label', label: '説明', type: 'text', default: '画像' }],
+    draw(p, w, h, ctx) {
+      const C = ctx.C;
+      return [
+        { t: 'rect', x: 0, y: 0, w, h, fill: C.soft, stroke: C.line },
+        { t: 'line', x1: 0, y1: 0, x2: w, y2: h, stroke: C.line },
+        { t: 'line', x1: w, y1: 0, x2: 0, y2: h, stroke: C.line },
+        { t: 'rect', x: w / 2 - Math.min(w - 8, 96) / 2, y: h / 2 - 14, w: Math.min(w - 8, 96), h: 28, r: 4, fill: C.paper },
+        { t: 'text', x: 0, y: 0, w, h, text: p.label, size: 13, color: C.sub, align: 'center', fit: 'ellipsis' },
+      ];
+    },
+  });
+})();
+
+</script>
+<script>/* components/annotation.js */
+/* 注釈系の部品：番号マーク、付箋、矢印、範囲枠。設計書で画面に説明を書き込むときに使う */
+(function () {
+  'use strict';
+  const { register } = window.GamenUI;
+
+  register({
+    type: 'marker',
+    name: '番号マーク',
+    category: '注釈',
+    size: { w: 28, h: 28 },
+    props: [
+      { key: 'number', label: '番号', type: 'text', default: '1' },
+      { key: 'color', label: '色', type: 'color', default: '#E11D48' },
+    ],
+    draw(p, w, h, ctx) {
+      const c = p.color || '#E11D48';
+      const s = Math.min(w, h);
+      return [
+        { t: 'ellipse', x: (w - s) / 2, y: (h - s) / 2, w: s, h: s, fill: c },
+        { t: 'text', x: 0, y: 0, w, h, text: p.number, size: Math.round(s * 0.5), bold: true, color: ctx.onColor(c), align: 'center' },
+      ];
+    },
+  });
+
+  register({
+    type: 'sticky',
+    name: '付箋',
+    category: '注釈',
+    size: { w: 220, h: 120 },
+    props: [
+      { key: 'title', label: '見出し', type: 'text', default: '① 検索条件' },
+      { key: 'text', label: '本文', type: 'textarea', default: '条件を1つ以上入力しないと\n「検索」は押せない。\n氏名は前方一致で検索する。' },
+      { key: 'color', label: '色', type: 'color', default: '#FEF3C7' },
+    ],
+    draw(p, w, h, ctx) {
+      const bg = p.color || '#FEF3C7';
+      const bd = ctx.shade(bg, 0.18);
+      const out = [{ t: 'rect', x: 0, y: 0, w, h, r: 2, fill: bg, stroke: bd }];
+      let y = 10;
+      if (p.title) { out.push({ t: 'text', x: 12, y, w: w - 24, h: 20, text: p.title, size: 13, bold: true, color: '#78350F', fit: 'ellipsis' }); y += 24; }
+      out.push({ t: 'text', x: 12, y, w: w - 24, h: h - y - 10, text: p.text, size: 12, color: '#78350F', valign: 'top', fit: 'wrap' });
+      return out;
+    },
+  });
+
+  register({
+    type: 'arrow',
+    name: '矢印',
+    category: '注釈',
+    size: { w: 120, h: 24 },
+    props: [
+      { key: 'dir', label: '向き', type: 'select', default: 'right',
+        options: [['right', '→ 右'], ['left', '← 左'], ['down', '↓ 下'], ['up', '↑ 上'], ['downright', '↘ 右下'], ['upright', '↗ 右上'], ['downleft', '↙ 左下'], ['upleft', '↖ 左上']] },
+      { key: 'color', label: '色', type: 'color', default: '#E11D48' },
+      { key: 'width', label: '太さ', type: 'number', default: 2, min: 1, max: 8 },
+      { key: 'dash', label: '破線', type: 'bool', default: false },
+    ],
+    draw(p, w, h) {
+      const m = {
+        right: [0, h / 2, w, h / 2], left: [w, h / 2, 0, h / 2], down: [w / 2, 0, w / 2, h], up: [w / 2, h, w / 2, 0],
+        downright: [0, 0, w, h], upright: [0, h, w, 0], downleft: [w, 0, 0, h], upleft: [w, h, 0, 0],
+      }[p.dir] || [0, h / 2, w, h / 2];
+      return [{ t: 'line', x1: m[0], y1: m[1], x2: m[2], y2: m[3], stroke: p.color || '#E11D48', sw: Number(p.width) || 2, dash: p.dash, arrow: true }];
+    },
+  });
+
+  register({
+    type: 'focus',
+    name: '範囲枠',
+    category: '注釈',
+    size: { w: 280, h: 120 },
+    props: [
+      { key: 'color', label: '色', type: 'color', default: '#E11D48' },
+      { key: 'width', label: '太さ', type: 'number', default: 2, min: 1, max: 8 },
+      { key: 'dash', label: '破線', type: 'bool', default: true },
+    ],
+    draw(p, w, h) {
+      const sw = Number(p.width) || 2;
+      return [{ t: 'rect', x: sw / 2, y: sw / 2, w: w - sw, h: h - sw, r: 6, stroke: p.color || '#E11D48', sw, dash: p.dash }];
+    },
+  });
+})();
+
+</script>
+<script>/* components/steps.js */
+/* ステップ表示（README の「部品の増やし方」の例と同じもの） */
+(function () {
+  'use strict';
+  window.GamenUI.register({
+    type: 'steps',                 // 英数字の識別子（他と重ならないもの）
+    name: 'ステップ表示',           // パレットに出る名前
+    category: '表示',               // パレットの分類（新しい名前にすると分類が増える）
+    size: { w: 480, h: 56 },        // 置いたときの大きさ
+    props: [                        // 右側の設定欄
+      { key: 'steps', label: 'ステップ（カンマ区切り）', type: 'text', default: '入力,確認,完了' },
+      { key: 'current', label: '現在の番号', type: 'number', default: 1, min: 1 },
+      { key: 'color', label: '色', type: 'color', default: '' },   // '' はテーマ色
+    ],
+    draw(p, w, h, ctx) {            // 基本図形の配列を返す
+      const c = ctx.color(p.color);
+      const steps = ctx.list(p.steps);
+      const step = w / steps.length;
+      const out = [];
+      steps.forEach((s, i) => {
+        const done = i + 1 <= Number(p.current);
+        const cx = step * i + step / 2;
+        if (i > 0) out.push({ t: 'line', x1: cx - step + 16, y1: 14, x2: cx - 16, y2: 14, stroke: ctx.C.line, sw: 2 });
+        out.push({ t: 'ellipse', x: cx - 14, y: 0, w: 28, h: 28, fill: done ? c : ctx.C.paper, stroke: done ? null : ctx.C.line });
+        out.push({ t: 'text', x: cx - 14, y: 0, w: 28, h: 28, text: String(i + 1), size: 13, bold: true, color: done ? '#FFFFFF' : ctx.C.sub, align: 'center' });
+        out.push({ t: 'text', x: cx - step / 2, y: 32, w: step, h: 24, text: s, size: 13, color: ctx.C.ink, align: 'center' });
+      });
+      return out;
+    },
+  });
+})();
+
+</script>
+
+<!-- 画面 -->
+<script>/* core/sample.js */
+/* 初回起動時に表示するサンプル（顧客検索・顧客詳細の2画面）。中身はすべて架空のデータ。 */
+(function () {
+  'use strict';
+
+  const it = (type, x, y, w, h, props) => ({ type, x, y, w, h, props: props || {} });
+  const frame = (active, crumbs) => [
+    it('header', 0, 0, 1280, 56),
+    it('sidemenu', 0, 56, 220, 664, { active }),
+    it('breadcrumb', 252, 76, 600, 24, { items: crumbs }),
+  ];
+
+  window.GamenSample = function () {
+    return {
+      title: '顧客管理システム 画面イメージ（サンプル）',
+      size: { w: 1280, h: 720 },
+      theme: { primary: '#2457C5' },
+      pages: [
+        {
+          name: '顧客検索',
+          items: [
+            ...frame(2, 'ホーム,顧客管理,顧客検索'),
+            it('heading', 252, 104, 480, 40, { text: '顧客検索' }),
+            it('panel', 252, 156, 996, 216, { title: '検索条件' }),
+            it('input', 276, 208, 440, 40, { label: '顧客番号', labelWidth: 112, placeholder: '7桁の数字' }),
+            it('input', 756, 208, 468, 40, { label: '氏名（カナ）', labelWidth: 112, placeholder: '例）ヤマダ タロウ' }),
+            it('select', 276, 260, 440, 40, { label: '店舗', labelWidth: 112, placeholder: 'すべての店舗' }),
+            it('text', 756, 264, 112, 32, { text: '顧客区分', bold: true }),
+            it('radio', 868, 264, 300, 32, { options: 'すべて,個人,法人', selected: 1 }),
+            it('button', 1000, 316, 104, 40, { label: 'クリア', variant: 'secondary' }),
+            it('button', 1116, 316, 108, 40, { label: '検索', variant: 'primary' }),
+            it('text', 252, 390, 300, 28, { text: '検索結果', size: 16, bold: true }),
+            it('pagination', 868, 388, 380, 32, { total: '全 128 件', pages: 5, current: 1 }),
+            it('table', 252, 428, 996, 252),
+            it('marker', 240, 144, 28, 28, { number: '1' }),
+            it('marker', 1210, 304, 28, 28, { number: '2' }),
+            it('marker', 240, 416, 28, 28, { number: '3' }),
+          ],
+        },
+        {
+          name: '顧客詳細',
+          items: [
+            ...frame(2, 'ホーム,顧客管理,顧客検索,顧客詳細'),
+            it('heading', 252, 104, 220, 40, { text: '山田 太郎 様' }),
+            it('badge', 420, 111, 72, 26, { text: '取引中', tone: 'success' }),
+            it('tabs', 252, 156, 996, 44, { active: 1 }),
+            it('panel', 252, 220, 640, 300, { title: '基本情報' }),
+            it('input', 276, 270, 592, 40, { label: '顧客番号', labelWidth: 140, value: '0012345', disabled: true }),
+            it('input', 276, 318, 592, 40, { label: '氏名', labelWidth: 140, value: '山田 太郎' }),
+            it('input', 276, 366, 592, 40, { label: '氏名（カナ）', labelWidth: 140, value: 'ヤマダ タロウ' }),
+            it('date', 276, 414, 400, 40, { label: '生年月日', labelWidth: 140, value: '1985/04/12', placeholder: 'YYYY/MM/DD' }),
+            it('input', 276, 462, 592, 40, { label: '電話番号', labelWidth: 140, value: '090-1234-5678' }),
+            it('stat', 912, 220, 336, 104, { label: '預金残高（合計）', value: '3,250,000', unit: '円', note: '普通預金・定期預金の合計' }),
+            it('stat', 912, 340, 336, 104, { label: '今月の取引', value: '12', unit: '件', note: '前月比 +3 件' }),
+            it('alert', 912, 460, 336, 60, { text: '住所変更の届出が未処理です。', tone: 'warning' }),
+            it('button', 252, 548, 120, 40, { label: '一覧に戻る', variant: 'secondary' }),
+            it('button', 1128, 548, 120, 40, { label: '編集する', variant: 'primary' }),
+            it('focus', 268, 262, 608, 56, { color: '#E11D48' }),
+            it('marker', 256, 250, 28, 28, { number: '1' }),
+            it('sticky', 912, 588, 200, 112, { title: '① 顧客番号', text: '変更できないため\n灰色で表示する。\n編集は「編集する」から。' }),
+          ],
+        },
+      ],
+    };
+  };
+})();
+
+</script>
+<script>/* core/editor.js */
+/*
+ * エディタ本体：配置・選択・移動・リサイズ・プロパティ編集・ページ管理・保存・出力
+ *
+ * データの形（保存ファイルもこの形の JSON）:
+ * {
+ *   title, size: { w, h }, theme: { primary },
+ *   pages: [ { id, name, items: [ { id, type, x, y, w, h, props } ] } ]
+ * }
+ * items の並び順がそのまま重なり順（後ろほど前面）。
+ */
+(function () {
+  'use strict';
+
+  const UI = window.GamenUI;
+  const R = window.GamenRender;
+  const $ = (s, el) => (el || document).querySelector(s);
+
+  const STORE_KEY = 'gamen-editor:v1';
+  const GRID = 8;
+  const SIZE_PRESETS = [
+    [1280, 720, '1280 × 720（16:9）'],
+    [1366, 768, '1366 × 768'],
+    [1440, 900, '1440 × 900'],
+    [1920, 1080, '1920 × 1080（フルHD）'],
+    [1024, 768, '1024 × 768（4:3）'],
+    [390, 844, '390 × 844（スマホ縦）'],
+  ];
+  const THEME_SWATCHES = ['#2457C5', '#1E3A8A', '#0F766E', '#15803D', '#7C3AED', '#B91C1C', '#C2410C', '#334155'];
+
+  // inner: ダブルクリックで「中に入った」グループ。その間はグループ内の部品を1つずつ選べる
+  const state = { doc: null, page: 0, sel: [], zoom: 1, snap: true, grid: true, clipboard: null, drag: null, inner: null };
+  const hist = { stack: [], index: -1 };
+
+  const el = {
+    stage: $('#stage'), wrap: $('#screenWrap'), screen: $('#screen'), items: $('#items'), overlay: $('#overlay'),
+    palette: $('#palette'), search: $('#paletteSearch'), inspector: $('#inspector'), pages: $('#pages'),
+    status: $('#status'), toast: $('#toast'), title: $('#docTitle'), zoom: $('#btnZoomFit'),
+  };
+
+  // ---------------------------------------------------------------- ユーティリティ
+  const uid = () => 'e' + Math.random().toString(36).slice(2, 10);
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const page = () => state.doc.pages[state.page];
+  const findItem = (id) => page().items.find((i) => i.id === id);
+  const selItems = () => state.sel.map(findItem).filter(Boolean);
+  const ctx = () => R.makeCtx(state.doc ? state.doc.theme : null);
+
+  // ---------------------------------------------------------------- グループ
+  // 部品の group に同じ ID を持たせたものが1グループ。クリックするとまとめて選ばれる。
+  function withGroups(ids) {
+    const groups = new Set(ids.map(findItem).filter((i) => i && i.group && i.group !== state.inner).map((i) => i.group));
+    if (!groups.size) return ids;
+    const extra = page().items.filter((i) => groups.has(i.group)).map((i) => i.id);
+    return [...new Set([...ids, ...extra])];
+  }
+  // 選択がちょうど1つのグループ全体なら、そのグループ ID を返す
+  function soleGroup() {
+    const items = selItems();
+    if (items.length < 2) return null;
+    const g = items[0].group;
+    if (!g || !items.every((i) => i.group === g)) return null;
+    return page().items.filter((i) => i.group === g).length === items.length ? g : null;
+  }
+  // 1個だけになったグループは解除する
+  function tidyGroups() {
+    const count = {};
+    page().items.forEach((i) => { if (i.group) count[i.group] = (count[i.group] || 0) + 1; });
+    page().items.forEach((i) => { if (i.group && count[i.group] < 2) delete i.group; });
+  }
+  function groupSel() {
+    const items = selItems();
+    if (items.length < 2) return;
+    const gid = 'g' + uid().slice(1);
+    const ids = new Set(items.map((i) => i.id));
+    items.forEach((i) => { i.group = gid; });
+    // 重なり順を連続させる（一番前にある部品の位置にまとめる）
+    const all = page().items;
+    const top = Math.max(...all.map((i, idx) => (ids.has(i.id) ? idx : -1)));
+    const before = all.slice(0, top + 1).filter((i) => !ids.has(i.id));
+    const after = all.slice(top + 1);
+    page().items = [...before, ...all.filter((i) => ids.has(i.id)), ...after];
+    state.inner = null;
+    tidyGroups();
+    renderItems(); selectionChanged(); commit();
+    toast(`${items.length} 個の部品をグループにしました`);
+  }
+  function ungroupSel() {
+    const items = selItems().filter((i) => i.group);
+    if (!items.length) return;
+    const groups = new Set(items.map((i) => i.group));
+    page().items.forEach((i) => { if (groups.has(i.group)) delete i.group; });
+    state.inner = null;
+    selectionChanged(); commit();
+    toast('グループを解除しました');
+  }
+  const snapV = (v, on) => (on ? Math.round(v / GRID) * GRID : Math.round(v));
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  let toastTimer = null;
+  function toast(msg, isError) {
+    el.toast.textContent = msg;
+    el.toast.classList.toggle('error', !!isError);
+    el.toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.toast.hidden = true; }, isError ? 5000 : 2600);
+  }
+
+  function download(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
+  function fileBase() {
+    const t = (state.doc.title || '画面イメージ').replace(/[\\/:*?"<>|]/g, '_').trim();
+    return t || '画面イメージ';
+  }
+
+  // ---------------------------------------------------------------- データの整形
+  // 保存ファイルを読み込んだとき、後から追加された部品プロパティにも既定値を補う
+  function normalizeDoc(raw) {
+    const d = raw && typeof raw === 'object' ? raw : {};
+    const out = {
+      title: String(d.title || '画面イメージ'),
+      size: { w: Math.max(200, Number(d.size && d.size.w) || 1280), h: Math.max(200, Number(d.size && d.size.h) || 720) },
+      theme: { primary: (d.theme && d.theme.primary) || '#2457C5' },
+      pages: [],
+    };
+    const pages = Array.isArray(d.pages) && d.pages.length ? d.pages : [{ name: '画面1', items: [] }];
+    out.pages = pages.map((p, pi) => ({
+      id: p.id || uid(),
+      name: String(p.name || `画面${pi + 1}`),
+      items: (Array.isArray(p.items) ? p.items : []).map((i) => ({
+        id: i.id || uid(),
+        type: String(i.type || ''),
+        x: Number(i.x) || 0, y: Number(i.y) || 0,
+        w: Math.max(4, Number(i.w) || 40), h: Math.max(4, Number(i.h) || 20),
+        props: { ...UI.defaults(i.type), ...(i.props || {}) },
+        ...(i.group ? { group: String(i.group) } : {}),
+      })),
+    }));
+    return out;
+  }
+
+  // ---------------------------------------------------------------- 履歴・保存
+  function commit() {
+    const snap = JSON.stringify(state.doc);
+    if (hist.stack[hist.index] === snap) return;
+    hist.stack = hist.stack.slice(0, hist.index + 1);
+    hist.stack.push(snap);
+    if (hist.stack.length > 200) hist.stack.shift();
+    hist.index = hist.stack.length - 1;
+    persist();
+    updateToolbar();
+  }
+  function restore(snap) {
+    state.doc = JSON.parse(snap);
+    state.page = Math.min(state.page, state.doc.pages.length - 1);
+    state.sel = state.sel.filter((id) => findItem(id));
+    state.inner = null;
+    renderAll();
+    persist();
+  }
+  function undo() { if (hist.index > 0) { hist.index--; restore(hist.stack[hist.index]); } }
+  function redo() { if (hist.index < hist.stack.length - 1) { hist.index++; restore(hist.stack[hist.index]); } }
+
+  function persist() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ doc: state.doc, page: state.page })); } catch (e) { /* 保存できない環境では何もしない */ }
+  }
+  function loadStored() {
+    try {
+      const s = localStorage.getItem(STORE_KEY);
+      if (!s) return null;
+      const o = JSON.parse(s);
+      return o && o.doc ? o : null;
+    } catch (e) { return null; }
+  }
+
+  function setDoc(doc, pageIndex) {
+    state.doc = normalizeDoc(doc);
+    state.page = Math.max(0, Math.min(pageIndex || 0, state.doc.pages.length - 1));
+    state.sel = [];
+    hist.stack = [];
+    hist.index = -1;
+    commit();
+    renderAll();
+    zoomFit();
+  }
+
+  // ---------------------------------------------------------------- 部品パレット
+  function renderPalette() {
+    const q = el.search.value.trim().toLowerCase();
+    const c = ctx();
+    const html = UI.categories().map((cat) => {
+      const defs = UI.all().filter((d) => d.category === cat && (!q || d.name.toLowerCase().includes(q) || d.type.includes(q)));
+      if (!defs.length) return '';
+      return `<section class="cat"><h3>${esc(cat)}</h3><div class="tiles">${defs.map((d) => {
+        const w = d.size.w, h = d.size.h;
+        // 横長の部品は一部だけを見せる（細くなりすぎないように）
+        const vw = Math.min(w, Math.max(h * 3.2, 120));
+        const vh = Math.min(h, vw * 0.9);
+        const svg = R.itemSVG(d, UI.defaults(d.type), w, h, c);
+        return `<div class="tile" draggable="true" data-type="${esc(d.type)}" title="${esc(d.name)}を追加">` +
+          `<div class="thumb"><svg viewBox="-4 -4 ${vw + 8} ${vh + 8}" preserveAspectRatio="xMidYMid meet" style="font-family:${esc(R.FONT_STACK)}">${svg}</svg></div>` +
+          `<span>${esc(d.name)}</span></div>`;
+      }).join('')}</div></section>`;
+    }).join('');
+    el.palette.innerHTML = html || '<p class="hint" style="padding:12px 4px">該当する部品がありません。</p>';
+  }
+
+  // ---------------------------------------------------------------- 画面の描画
+  function applyZoom() {
+    const { w, h } = state.doc.size;
+    el.screen.style.width = w + 'px';
+    el.screen.style.height = h + 'px';
+    el.screen.style.transform = `scale(${state.zoom})`;
+    el.screen.style.setProperty('--z', state.zoom);
+    el.wrap.style.width = w * state.zoom + 'px';
+    el.wrap.style.height = h * state.zoom + 'px';
+    el.zoom.textContent = Math.round(state.zoom * 100) + '%';
+  }
+
+  function itemHTML(item, c) {
+    const def = UI.get(item.type);
+    if (!def) return `<span>未登録の部品：${esc(item.type)}</span>`;
+    return `<svg viewBox="0 0 ${item.w} ${item.h}" preserveAspectRatio="none">${R.itemSVG(def, item.props, item.w, item.h, c)}</svg>`;
+  }
+
+  function placeEl(node, item) {
+    node.style.left = item.x + 'px';
+    node.style.top = item.y + 'px';
+    node.style.width = item.w + 'px';
+    node.style.height = item.h + 'px';
+  }
+
+  function renderItems() {
+    const c = ctx();
+    el.items.innerHTML = '';
+    page().items.forEach((item) => {
+      const node = document.createElement('div');
+      node.className = 'item' + (UI.get(item.type) ? '' : ' missing');
+      node.dataset.id = item.id;
+      placeEl(node, item);
+      node.innerHTML = itemHTML(item, c);
+      markOverflow(node);
+      el.items.appendChild(node);
+    });
+  }
+
+  function renderItem(item, redraw) {
+    const node = el.items.querySelector(`[data-id="${item.id}"]`);
+    if (!node) return;
+    placeEl(node, item);
+    if (redraw) { node.innerHTML = itemHTML(item, ctx()); markOverflow(node); }
+  }
+
+  // 文字が枠に収まらず省略されたときの目印（画面上だけ。出力には出ない）
+  function markOverflow(node) {
+    const over = !!R.itemSVG.overflow && !node.classList.contains('missing');
+    node.classList.toggle('overflow', over);
+    if (over) node.title = '文字が枠に収まっていません（大きさを広げると全部表示されます）';
+    else node.removeAttribute('title');
+    R.itemSVG.overflow = false;
+  }
+
+  function renderOverlay(extra) {
+    const items = selItems();
+    const bbox = (list) => {
+      const x = Math.min(...list.map((i) => i.x)), y = Math.min(...list.map((i) => i.y));
+      return { x, y, w: Math.max(...list.map((i) => i.x + i.w)) - x, h: Math.max(...list.map((i) => i.y + i.h)) - y };
+    };
+    const boxDiv = (cls, b) => `<div class="${cls}" style="left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px"></div>`;
+    let html = '';
+    // 中に入っているグループの範囲（薄く）
+    if (state.inner) {
+      const members = page().items.filter((i) => i.group === state.inner);
+      if (members.length) html += boxDiv('group-box inner', bbox(members));
+    }
+    // 選択中のグループは外枠で、個々の部品は細い枠で示す
+    const groups = new Set(items.filter((i) => i.group && i.group !== state.inner).map((i) => i.group));
+    groups.forEach((g) => { html += boxDiv('group-box', bbox(page().items.filter((i) => i.group === g))); });
+    html += items.map((i) => boxDiv(i.group && i.group !== state.inner ? 'sel member' : 'sel', i)).join('');
+    if (items.length === 1) {
+      const i = items[0];
+      const pts = { nw: [0, 0], n: [0.5, 0], ne: [1, 0], e: [1, 0.5], se: [1, 1], s: [0.5, 1], sw: [0, 1], w: [0, 0.5] };
+      html += Object.keys(pts).map((d) => `<div class="handle" data-dir="${d}" style="left:${i.x + i.w * pts[d][0]}px;top:${i.y + i.h * pts[d][1]}px"></div>`).join('');
+      if (state.drag && (state.drag.mode === 'resize' || state.drag.mode === 'move')) {
+        const label = state.drag.mode === 'resize' ? `${i.w} × ${i.h}` : `${i.x}, ${i.y}`;
+        html += `<div class="size-tip" style="left:${i.x + i.w / 2}px;top:${i.y + i.h + 8 / state.zoom}px">${label}</div>`;
+      }
+    }
+    if (extra) html += extra;
+    el.overlay.innerHTML = html;
+  }
+
+  function renderPages() {
+    el.pages.innerHTML = state.doc.pages.map((p, i) =>
+      `<button class="page-tab" role="tab" aria-selected="${i === state.page}" data-index="${i}"><span class="num">${i + 1}</span>${esc(p.name)}</button>`).join('');
+  }
+
+  function updateToolbar() {
+    $('#btnUndo').disabled = hist.index <= 0;
+    $('#btnRedo').disabled = hist.index >= hist.stack.length - 1;
+    if (state.doc) {
+      el.status.textContent = `${state.doc.size.w} × ${state.doc.size.h} px ・ 部品 ${page().items.length} 個`;
+      if (document.activeElement !== el.title) el.title.value = state.doc.title;
+    }
+  }
+
+  function renderAll() {
+    applyZoom();
+    el.screen.classList.toggle('show-grid', state.grid);
+    renderItems();
+    renderOverlay();
+    renderPages();
+    renderInspector();
+    updateToolbar();
+  }
+
+  function selectionChanged() {
+    renderOverlay();
+    renderInspector();
+  }
+
+  // ---------------------------------------------------------------- プロパティ欄
+  function fieldHTML(p, value) {
+    const id = `prop-${p.key}`;
+    const v = value == null ? '' : value;
+    switch (p.type) {
+      case 'textarea':
+        return `<label class="field"><span>${esc(p.label)}</span><textarea id="${id}" data-key="${p.key}" spellcheck="false" wrap="off">${esc(v)}</textarea></label>`;
+      case 'number':
+        return `<label class="field"><span>${esc(p.label)}</span><input type="number" id="${id}" data-key="${p.key}" value="${esc(v)}"` +
+          `${p.min != null ? ` min="${p.min}"` : ''}${p.max != null ? ` max="${p.max}"` : ''}${p.step != null ? ` step="${p.step}"` : ''}></label>`;
+      case 'bool':
+        return `<label class="field bool"><input type="checkbox" id="${id}" data-key="${p.key}"${v ? ' checked' : ''}><span>${esc(p.label)}</span></label>`;
+      case 'select':
+        return `<label class="field"><span>${esc(p.label)}</span><select id="${id}" data-key="${p.key}">` +
+          (p.options || []).map(([ov, ol]) => `<option value="${esc(ov)}"${String(ov) === String(v) ? ' selected' : ''}>${esc(ol)}</option>`).join('') + '</select></label>';
+      case 'color': {
+        const shown = v || state.doc.theme.primary;
+        return `<div class="field"><span>${esc(p.label)}</span><div class="color-row">` +
+          `<input type="color" id="${id}" data-key="${p.key}" data-color="1" value="${esc(toHex6(shown))}" aria-label="${esc(p.label)}">` +
+          `<input type="text" id="${id}-hex" data-key="${p.key}" data-hex="1" value="${esc(v)}" placeholder="テーマ色" spellcheck="false" aria-label="${esc(p.label)}（16進）">` +
+          `<button class="btn small outline" type="button" data-reset="${p.key}">既定</button></div></div>`;
+      }
+      default:
+        return `<label class="field"><span>${esc(p.label)}</span><input type="text" id="${id}" data-key="${p.key}" value="${esc(v)}" spellcheck="false"></label>`;
+    }
+  }
+
+  function toHex6(c) {
+    let h = String(c || '').replace('#', '');
+    if (h.length === 3) h = h.split('').map((x) => x + x).join('');
+    return /^[0-9a-fA-F]{6}$/.test(h) ? '#' + h.toLowerCase() : '#000000';
+  }
+
+  function geoHTML(i) {
+    return `<div class="geo">${['x', 'y', 'w', 'h'].map((k) =>
+      `<label>${{ x: 'X', y: 'Y', w: '幅', h: '高さ' }[k]}<input type="number" id="geo-${k}" data-geo="${k}" value="${i[k]}"></label>`).join('')}</div>`;
+  }
+
+  function renderInspector() {
+    const items = selItems();
+    let html = '';
+    if (items.length === 1) {
+      const i = items[0];
+      const def = UI.get(i.type);
+      const innerNote = i.group ? '<p class="hint">グループ内の部品を編集中です。Esc でグループに戻ります。</p>' : '';
+      html += `<section class="insp-section"><div class="insp-kind">${esc(def ? def.category : '不明')}</div><h2>${esc(def ? def.name : i.type)}</h2>${innerNote}${geoHTML(i)}</section>`;
+      if (def && def.props.length) {
+        html += `<section class="insp-section" id="propFields"><h3>設定</h3>${def.props.map((p) => fieldHTML(p, i.props[p.key])).join('')}</section>`;
+      }
+      html += `<section class="insp-section"><h3>操作</h3><div class="actions">` +
+        '<button class="btn small outline" data-act="duplicate">複製</button>' +
+        '<button class="btn small outline" data-act="front">最前面へ</button>' +
+        '<button class="btn small outline" data-act="back">最背面へ</button>' +
+        '<button class="btn small outline danger" data-act="delete">削除</button></div></section>';
+    } else if (items.length > 1) {
+      const g = soleGroup();
+      html += g
+        ? `<section class="insp-section"><div class="insp-kind">グループ</div><h2>${items.length} 個の部品のグループ</h2>` +
+          '<p class="hint">クリックでまとめて選択・移動できます。中の部品を1つだけ直すときはダブルクリックしてください。</p>' +
+          '<div class="actions"><button class="btn small outline" data-act="ungroup">グループ解除（Ctrl+Shift+G）</button></div></section>'
+        : `<section class="insp-section"><div class="insp-kind">複数選択</div><h2>${items.length} 個の部品</h2>` +
+          '<div class="actions"><button class="btn small outline" data-act="group">グループ化（Ctrl+G）</button>' +
+          (items.some((i) => i.group) ? '<button class="btn small outline" data-act="ungroup">グループ解除</button>' : '') + '</div></section>';
+      html += '<section class="insp-section"><h3>整列</h3><div class="align-grid">' +
+        [['left', '左'], ['hcenter', '左右中央'], ['right', '右'], ['hdist', '横に均等'], ['top', '上'], ['vcenter', '上下中央'], ['bottom', '下'], ['vdist', '縦に均等']]
+          .map(([k, l]) => `<button class="btn small outline" data-align="${k}">${l}</button>`).join('') + '</div></section>';
+      html += '<section class="insp-section"><h3>操作</h3><div class="actions">' +
+        '<button class="btn small outline" data-act="duplicate">複製</button>' +
+        '<button class="btn small outline" data-act="front">最前面へ</button>' +
+        '<button class="btn small outline" data-act="back">最背面へ</button>' +
+        '<button class="btn small outline danger" data-act="delete">削除</button></div></section>';
+    } else {
+      const d = state.doc;
+      const preset = SIZE_PRESETS.find((s) => s[0] === d.size.w && s[1] === d.size.h);
+      html += `<section class="insp-section"><div class="insp-kind">ページ ${state.page + 1} / ${d.pages.length}</div>` +
+        `<label class="field"><span>ページ名（スライド名）</span><input type="text" id="pageName" value="${esc(page().name)}"></label>` +
+        '<div class="actions"><button class="btn small outline" data-page="dup">ページを複製</button>' +
+        `<button class="btn small outline danger" data-page="del"${d.pages.length < 2 ? ' disabled' : ''}>ページを削除</button></div></section>`;
+      html += '<section class="insp-section"><h3>画面サイズ（全ページ共通）</h3>' +
+        `<label class="field"><select id="sizePreset">${SIZE_PRESETS.map((s) => `<option value="${s[0]}x${s[1]}"${preset === s ? ' selected' : ''}>${s[2]}</option>`).join('')}` +
+        `<option value="custom"${preset ? '' : ' selected'}>自由に指定</option></select></label>` +
+        `<div class="geo" style="grid-template-columns:1fr 1fr"><label>幅<input type="number" id="sizeW" value="${d.size.w}" min="200"></label>` +
+        `<label>高さ<input type="number" id="sizeH" value="${d.size.h}" min="200"></label></div></section>`;
+      html += '<section class="insp-section"><h3>テーマ色</h3><div class="swatches">' +
+        THEME_SWATCHES.map((c) => `<button class="swatch" style="background:${c}" data-theme-color="${c}" aria-label="${c}" aria-pressed="${c.toLowerCase() === d.theme.primary.toLowerCase()}"></button>`).join('') +
+        `</div><div class="color-row" style="grid-template-columns:34px minmax(0,1fr)"><input type="color" id="themeColor" value="${toHex6(d.theme.primary)}" aria-label="テーマ色">` +
+        `<input type="text" id="themeHex" value="${esc(d.theme.primary)}" spellcheck="false" aria-label="テーマ色（16進）" style="width:100%;border:1px solid var(--rule);border-radius:6px;padding:6px 8px;background:var(--panel)"></div>` +
+        '<p class="hint">色を「既定」にした部品は、すべてこの色になります。</p></section>';
+      html += '<section class="insp-section"><h3>操作のヒント</h3><dl class="keys">' +
+        '<dt><kbd>Shift</kbd>+クリック</dt><dd>複数選択</dd>' +
+        '<dt>空白をドラッグ</dt><dd>範囲で選択</dd>' +
+        '<dt><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dt><dd>1px 移動（Shift で 8px）</dd>' +
+        '<dt><kbd>Alt</kbd>+ドラッグ</dt><dd>吸着せずに動かす</dd>' +
+        '<dt><kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>V</kbd></dt><dd>コピー / 貼り付け</dd>' +
+        '<dt><kbd>Ctrl</kbd>+<kbd>D</kbd></dt><dd>複製</dd>' +
+        '<dt><kbd>Ctrl</kbd>+<kbd>G</kbd></dt><dd>グループ化（Shift で解除）</dd>' +
+        '<dt>ダブルクリック</dt><dd>グループ内の1つを選ぶ</dd>' +
+        '<dt><kbd>Delete</kbd></dt><dd>削除</dd>' +
+        '<dt><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></dt><dd>元に戻す / やり直す</dd>' +
+        '<dt><kbd>Ctrl</kbd>+ホイール</dt><dd>拡大・縮小</dd></dl>' +
+        '<p class="hint">編集内容はこのブラウザに自動で保存されます。別のPCに移すときは「保存」でファイルにしてください。</p></section>';
+    }
+    el.inspector.innerHTML = html;
+  }
+
+  function setProp(item, key, value) {
+    const def = UI.get(item.type);
+    const p = def && def.props.find((x) => x.key === key);
+    if (p && p.type === 'number') {
+      let n = Number(value);
+      if (!Number.isFinite(n)) return;
+      if (p.min != null) n = Math.max(p.min, n);
+      if (p.max != null) n = Math.min(p.max, n);
+      value = n;
+    }
+    item.props[key] = value;
+    renderItem(item, true);
+  }
+
+  function onInspectorInput(e, final) {
+    const t = e.target;
+    const items = selItems();
+    if (items.length === 1) {
+      const item = items[0];
+      if (t.dataset.geo) {
+        const v = Math.round(Number(t.value));
+        if (!Number.isFinite(v)) return;
+        item[t.dataset.geo] = t.dataset.geo === 'w' || t.dataset.geo === 'h' ? Math.max(4, v) : v;
+        renderItem(item, true);
+        renderOverlay();
+      } else if (t.dataset.key) {
+        const key = t.dataset.key;
+        let value;
+        if (t.type === 'checkbox') value = t.checked;
+        else if (t.dataset.color) { value = t.value.toUpperCase(); const hx = $(`#prop-${key}-hex`); if (hx) hx.value = value; }
+        else if (t.dataset.hex) {
+          value = t.value.trim();
+          if (value && !/^#?[0-9a-fA-F]{6}$/.test(value)) return; // 入力途中は反映しない
+          if (value && value[0] !== '#') value = '#' + value;
+          const pick = $(`#prop-${key}`);
+          if (pick) pick.value = toHex6(value || state.doc.theme.primary);
+        } else value = t.value;
+        setProp(item, key, value);
+      }
+      if (final) commit();
+      return;
+    }
+    if (items.length) return;
+    // ページ・資料の設定
+    if (t.id === 'pageName') {
+      page().name = t.value || `画面${state.page + 1}`;
+      renderPages();
+      if (final) commit();
+    } else if (t.id === 'sizePreset' && final) {
+      if (t.value !== 'custom') {
+        const [w, h] = t.value.split('x').map(Number);
+        state.doc.size = { w, h };
+        commit(); applyZoom(); zoomFit(); renderInspector(); updateToolbar();
+      }
+    } else if ((t.id === 'sizeW' || t.id === 'sizeH') && final) {
+      const w = Math.max(200, Math.min(4000, Number($('#sizeW').value) || 1280));
+      const h = Math.max(200, Math.min(4000, Number($('#sizeH').value) || 720));
+      state.doc.size = { w, h };
+      commit(); applyZoom(); zoomFit(); renderInspector(); updateToolbar();
+    } else if (t.id === 'themeColor' || (t.id === 'themeHex' && /^#?[0-9a-fA-F]{6}$/.test(t.value.trim()))) {
+      let v = t.value.trim().toUpperCase();
+      if (v[0] !== '#') v = '#' + v;
+      setTheme(v, final);
+    }
+  }
+
+  function setTheme(color, final) {
+    state.doc.theme.primary = color;
+    renderItems();
+    renderPalette();
+    if (final) { commit(); renderInspector(); }
+    else {
+      const hx = $('#themeHex'); if (hx && document.activeElement !== hx) hx.value = color;
+      const pk = $('#themeColor'); if (pk && document.activeElement !== pk) pk.value = toHex6(color);
+    }
+  }
+
+  // ---------------------------------------------------------------- 編集操作
+  function addItem(type, x, y) {
+    const def = UI.get(type);
+    if (!def) return;
+    const { w: sw, h: sh } = state.doc.size;
+    const w = Math.min(def.size.w, sw), h = Math.min(def.size.h, sh);
+    const item = {
+      id: uid(), type,
+      x: Math.max(0, Math.min(sw - w, snapV(x, state.snap))),
+      y: Math.max(0, Math.min(sh - h, snapV(y, state.snap))),
+      w, h, props: UI.defaults(type),
+    };
+    page().items.push(item);
+    state.sel = [item.id];
+    renderItems();
+    selectionChanged();
+    commit();
+  }
+
+  function visibleCenter() {
+    const r = el.stage.getBoundingClientRect();
+    const s = el.screen.getBoundingClientRect();
+    return { x: (r.left + r.width / 2 - s.left) / state.zoom, y: (r.top + r.height / 2 - s.top) / state.zoom };
+  }
+
+  function deleteSel() {
+    if (!state.sel.length) return;
+    page().items = page().items.filter((i) => !state.sel.includes(i.id));
+    state.sel = [];
+    tidyGroups();
+    renderItems(); selectionChanged(); commit();
+  }
+
+  function pasteItems(src, offset) {
+    const gmap = {};
+    const copies = src.map((i) => {
+      const c = { ...clone(i), id: uid(), x: i.x + offset, y: i.y + offset };
+      if (c.group) c.group = gmap[c.group] || (gmap[c.group] = 'g' + uid().slice(1));
+      return c;
+    });
+    state.inner = null;
+    page().items.push(...copies);
+    tidyGroups();
+    state.sel = copies.map((c) => c.id);
+    renderItems(); selectionChanged(); commit();
+  }
+
+  function reorder(toFront) {
+    const items = page().items;
+    const picked = items.filter((i) => state.sel.includes(i.id));
+    const rest = items.filter((i) => !state.sel.includes(i.id));
+    page().items = toFront ? [...rest, ...picked] : [...picked, ...rest];
+    renderItems(); renderOverlay(); commit();
+  }
+
+  function align(kind) {
+    const items = selItems();
+    if (items.length < 2) return;
+    const minX = Math.min(...items.map((i) => i.x)), maxX = Math.max(...items.map((i) => i.x + i.w));
+    const minY = Math.min(...items.map((i) => i.y)), maxY = Math.max(...items.map((i) => i.y + i.h));
+    const distribute = (axis) => {
+      const pos = axis === 'x' ? 'x' : 'y', size = axis === 'x' ? 'w' : 'h';
+      const sorted = items.slice().sort((a, b) => a[pos] - b[pos]);
+      const total = sorted.reduce((a, i) => a + i[size], 0);
+      const span = (axis === 'x' ? maxX - minX : maxY - minY) - total;
+      const gap = span / (sorted.length - 1);
+      let cur = axis === 'x' ? minX : minY;
+      sorted.forEach((i) => { i[pos] = Math.round(cur); cur += i[size] + gap; });
+    };
+    items.forEach((i) => {
+      if (kind === 'left') i.x = minX;
+      if (kind === 'right') i.x = maxX - i.w;
+      if (kind === 'hcenter') i.x = Math.round((minX + maxX) / 2 - i.w / 2);
+      if (kind === 'top') i.y = minY;
+      if (kind === 'bottom') i.y = maxY - i.h;
+      if (kind === 'vcenter') i.y = Math.round((minY + maxY) / 2 - i.h / 2);
+    });
+    if (kind === 'hdist') distribute('x');
+    if (kind === 'vdist') distribute('y');
+    items.forEach((i) => renderItem(i, false));
+    renderOverlay(); commit();
+  }
+
+  function nudge(dx, dy) {
+    const items = selItems();
+    if (!items.length) return;
+    items.forEach((i) => { i.x += dx; i.y += dy; renderItem(i, false); });
+    renderOverlay();
+    if (items.length === 1) renderInspectorGeo(items[0]);
+    clearTimeout(nudge.t);
+    nudge.t = setTimeout(commit, 300);
+  }
+
+  function renderInspectorGeo(i) {
+    ['x', 'y', 'w', 'h'].forEach((k) => { const inp = $(`#geo-${k}`); if (inp && document.activeElement !== inp) inp.value = i[k]; });
+  }
+
+  // ---------------------------------------------------------------- ページ
+  function gotoPage(i) {
+    state.page = Math.max(0, Math.min(i, state.doc.pages.length - 1));
+    state.sel = [];
+    state.inner = null;
+    renderAll();
+    persist();
+  }
+  function addPage(copyFrom) {
+    const p = copyFrom
+      ? { ...clone(copyFrom), id: uid(), name: copyFrom.name + '（コピー）', items: copyFrom.items.map((i) => ({ ...clone(i), id: uid() })) }
+      : { id: uid(), name: `画面${state.doc.pages.length + 1}`, items: [] };
+    state.doc.pages.splice(state.page + 1, 0, p);
+    state.page += 1;
+    state.sel = [];
+    commit(); renderAll();
+  }
+  function deletePage() {
+    if (state.doc.pages.length < 2) return;
+    if (!window.confirm(`ページ「${page().name}」を削除しますか？`)) return;
+    state.doc.pages.splice(state.page, 1);
+    state.page = Math.min(state.page, state.doc.pages.length - 1);
+    state.sel = [];
+    commit(); renderAll();
+  }
+
+  // ---------------------------------------------------------------- ズーム
+  function setZoom(z, anchor) {
+    const old = state.zoom;
+    const nz = Math.max(0.1, Math.min(4, z));
+    if (Math.abs(nz - old) < 0.001) return;
+    const st = el.stage;
+    const r = st.getBoundingClientRect();
+    const ax = anchor ? anchor.x - r.left : r.width / 2;
+    const ay = anchor ? anchor.y - r.top : r.height / 2;
+    const contentX = (st.scrollLeft + ax - el.wrap.offsetLeft) / old;
+    const contentY = (st.scrollTop + ay - el.wrap.offsetTop) / old;
+    state.zoom = nz;
+    applyZoom();
+    st.scrollLeft = contentX * nz + el.wrap.offsetLeft - ax;
+    st.scrollTop = contentY * nz + el.wrap.offsetTop - ay;
+  }
+  function zoomFit() {
+    const st = el.stage;
+    const margin = window.innerWidth < 900 ? 32 : 80;
+    const z = Math.min((st.clientWidth - margin) / state.doc.size.w, (st.clientHeight - margin) / state.doc.size.h);
+    state.zoom = Math.max(0.1, Math.min(2, Math.floor(z * 100) / 100));
+    applyZoom();
+    st.scrollLeft = 0; st.scrollTop = 0;
+  }
+
+  // ---------------------------------------------------------------- 出力
+  function pageSVG(p) {
+    const c = ctx();
+    const { w, h } = state.doc.size;
+    const body = p.items.map((i) => {
+      const def = UI.get(i.type);
+      if (!def) return '';
+      return `<svg x="${i.x}" y="${i.y}" width="${i.w}" height="${i.h}" viewBox="0 0 ${i.w} ${i.h}" overflow="visible">${R.itemSVG(def, i.props, i.w, i.h, c)}</svg>`;
+    }).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+      `<rect width="${w}" height="${h}" fill="#FFFFFF"/><g font-family="${esc(R.FONT_STACK)}">${body}</g></svg>`;
+  }
+
+  function pagePNG(scale) {
+    return new Promise((resolve, reject) => {
+      const { w, h } = state.doc.size;
+      const img = new Image();
+      img.onload = () => {
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(w * scale);
+        cv.height = Math.round(h * scale);
+        const g = cv.getContext('2d');
+        g.scale(scale, scale);
+        g.drawImage(img, 0, 0, w, h);
+        cv.toBlob((b) => (b ? resolve(b) : reject(new Error('画像を作れませんでした'))), 'image/png');
+      };
+      img.onerror = () => reject(new Error('画像を作れませんでした'));
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(pageSVG(page()));
+    });
+  }
+
+  async function exportPNG() {
+    try {
+      const blob = await pagePNG(2);
+      download(blob, `${fileBase()}_${page().name}.png`);
+      toast('PNG を書き出しました');
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function copyImage() {
+    try {
+      if (!navigator.clipboard || !window.ClipboardItem) throw new Error('このブラウザは画像のコピーに対応していません。PNG で書き出してください');
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': pagePNG(2) })]);
+      toast(`「${page().name}」を画像としてコピーしました。Excel に貼り付けできます`);
+    } catch (e) {
+      toast(e && e.message && /対応/.test(e.message) ? e.message : '画像をコピーできませんでした。PNG で書き出してください', true);
+    }
+  }
+
+  function exportPPTX() {
+    try {
+      const blob = window.GamenPptx.build(state.doc);
+      download(blob, `${fileBase()}.pptx`);
+      toast(`PowerPoint を書き出しました（${state.doc.pages.length} スライド）`);
+    } catch (e) {
+      console.error(e);
+      toast('PowerPoint を書き出せませんでした：' + e.message, true);
+    }
+  }
+
+  function saveJSON() {
+    const blob = new Blob([JSON.stringify({ app: 'gamen-editor', version: 1, ...state.doc }, null, 2)], { type: 'application/json' });
+    download(blob, `${fileBase()}.json`);
+    toast('編集データを保存しました');
+  }
+
+  function openJSON(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result));
+        if (!data || !Array.isArray(data.pages)) throw new Error();
+        setDoc(data, 0);
+        toast(`「${state.doc.title}」を開きました`);
+      } catch (e) {
+        toast('このファイルは読み込めません。「保存」で作ったファイルを選んでください', true);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---------------------------------------------------------------- マウス操作
+  function screenPoint(e) {
+    const r = el.screen.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / state.zoom, y: (e.clientY - r.top) / state.zoom };
+  }
+
+  el.screen.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    // 入力中のプロパティ欄を確定させてから操作する
+    if (document.activeElement && document.activeElement !== document.body && el.inspector.contains(document.activeElement)) document.activeElement.blur();
+    const pt = screenPoint(e);
+    const handle = e.target.closest('.handle');
+    const node = e.target.closest('.item');
+    if (handle) {
+      const i = selItems()[0];
+      state.drag = { mode: 'resize', dir: handle.dataset.dir, start: pt, orig: { x: i.x, y: i.y, w: i.w, h: i.h }, id: i.id, moved: false };
+    } else if (node) {
+      const id = node.dataset.id;
+      const it = findItem(id);
+      if (state.inner && (!it || it.group !== state.inner)) state.inner = null;
+      const unit = withGroups([id]);
+      if (e.shiftKey || e.ctrlKey || e.metaKey) {
+        const had = unit.every((u) => state.sel.includes(u));
+        state.sel = had ? state.sel.filter((s) => !unit.includes(s)) : [...new Set([...state.sel, ...unit])];
+        selectionChanged();
+        if (had) return;
+      } else if (!state.sel.includes(id)) {
+        state.sel = unit;
+        selectionChanged();
+      }
+      state.drag = { mode: 'move', start: pt, orig: selItems().map((i) => ({ id: i.id, x: i.x, y: i.y })), moved: false };
+    } else {
+      if (!e.shiftKey) { state.sel = []; state.inner = null; selectionChanged(); }
+      state.drag = { mode: 'marquee', start: pt, base: e.shiftKey ? state.sel.slice() : [], moved: false };
+    }
+    el.screen.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  el.screen.addEventListener('pointermove', (e) => {
+    const d = state.drag;
+    if (!d) return;
+    const pt = screenPoint(e);
+    const dx = pt.x - d.start.x, dy = pt.y - d.start.y;
+    if (!d.moved && Math.abs(dx) < 2 / state.zoom && Math.abs(dy) < 2 / state.zoom) return;
+    d.moved = true;
+    const snap = state.snap && !e.altKey;
+    if (d.mode === 'move') {
+      const first = d.orig[0];
+      const sdx = snapV(first.x + dx, snap) - first.x;
+      const sdy = snapV(first.y + dy, snap) - first.y;
+      d.orig.forEach((o) => { const i = findItem(o.id); i.x = o.x + sdx; i.y = o.y + sdy; renderItem(i, false); });
+      renderOverlay();
+      if (d.orig.length === 1) renderInspectorGeo(findItem(d.orig[0].id));
+    } else if (d.mode === 'resize') {
+      const i = findItem(d.id);
+      const o = d.orig;
+      let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
+      if (d.dir.includes('w')) x1 = Math.min(snapV(o.x + dx, snap), x2 - 4);
+      if (d.dir.includes('e')) x2 = Math.max(snapV(o.x + o.w + dx, snap), x1 + 4);
+      if (d.dir.includes('n')) y1 = Math.min(snapV(o.y + dy, snap), y2 - 4);
+      if (d.dir.includes('s')) y2 = Math.max(snapV(o.y + o.h + dy, snap), y1 + 4);
+      Object.assign(i, { x: x1, y: y1, w: x2 - x1, h: y2 - y1 });
+      renderItem(i, true);
+      renderOverlay();
+      renderInspectorGeo(i);
+    } else if (d.mode === 'marquee') {
+      const x = Math.min(d.start.x, pt.x), y = Math.min(d.start.y, pt.y);
+      const w = Math.abs(dx), h = Math.abs(dy);
+      const hit = page().items.filter((i) => i.x < x + w && i.x + i.w > x && i.y < y + h && i.y + i.h > y).map((i) => i.id);
+      state.sel = withGroups([...new Set([...d.base, ...hit])]);
+      renderOverlay(`<div class="marquee" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"></div>`);
+    }
+  });
+
+  function endDrag() {
+    const d = state.drag;
+    if (!d) return;
+    state.drag = null;
+    renderOverlay();
+    if (d.mode === 'marquee') renderInspector();
+    else if (d.moved) { commit(); renderInspector(); }
+  }
+  el.screen.addEventListener('pointerup', endDrag);
+  // ダブルクリック：グループの中に入り、1つだけ選ぶ
+  el.screen.addEventListener('dblclick', (e) => {
+    // ドラッグ用にポインターを捕まえているので、イベントの対象ではなく座標から部品を探す
+    const node = document.elementsFromPoint(e.clientX, e.clientY).find((n) => n.classList && n.classList.contains('item'));
+    const it = node && findItem(node.dataset.id);
+    if (!it || !it.group) return;
+    state.inner = it.group;
+    state.sel = [it.id];
+    selectionChanged();
+  });
+  el.screen.addEventListener('pointercancel', endDrag);
+
+  // パレットから配置
+  el.palette.addEventListener('dragstart', (e) => {
+    const tile = e.target.closest('.tile');
+    if (!tile) return;
+    e.dataTransfer.setData('text/plain', 'gamen:' + tile.dataset.type);
+    e.dataTransfer.effectAllowed = 'copy';
+    state.dragType = tile.dataset.type;
+  });
+  el.palette.addEventListener('dragend', () => { state.dragType = null; el.stage.classList.remove('drop-ok'); });
+  el.palette.addEventListener('click', (e) => {
+    const tile = e.target.closest('.tile');
+    if (!tile) return;
+    const def = UI.get(tile.dataset.type);
+    const c = visibleCenter();
+    addItem(def.type, c.x - def.size.w / 2, c.y - def.size.h / 2);
+  });
+  el.stage.addEventListener('dragover', (e) => {
+    if (!state.dragType) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    el.stage.classList.add('drop-ok');
+  });
+  el.stage.addEventListener('dragleave', (e) => { if (e.target === el.stage) el.stage.classList.remove('drop-ok'); });
+  el.stage.addEventListener('drop', (e) => {
+    el.stage.classList.remove('drop-ok');
+    const raw = e.dataTransfer.getData('text/plain') || '';
+    const type = raw.startsWith('gamen:') ? raw.slice(6) : state.dragType;
+    if (!type || !UI.get(type)) return;
+    e.preventDefault();
+    const def = UI.get(type);
+    const pt = screenPoint(e);
+    addItem(type, pt.x - Math.min(def.size.w, 200) / 2, pt.y - def.size.h / 2);
+  });
+
+  el.stage.addEventListener('wheel', (e) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    setZoom(state.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1), { x: e.clientX, y: e.clientY });
+  }, { passive: false });
+
+  // ---------------------------------------------------------------- キーボード
+  document.addEventListener('keydown', (e) => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    const mod = e.ctrlKey || e.metaKey;
+    const k = e.key.toLowerCase();
+    if (mod && k === 's') { e.preventDefault(); saveJSON(); return; }
+    if (typing) return;
+    if (mod && k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+    if (mod && (k === 'y' || (k === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
+    if (mod && k === 'a') { e.preventDefault(); state.sel = page().items.map((i) => i.id); selectionChanged(); return; }
+    if (mod && k === 'c' && state.sel.length) { state.clipboard = clone(selItems()); toast(`${state.clipboard.length} 個コピーしました`); return; }
+    if (mod && k === 'x' && state.sel.length) { state.clipboard = clone(selItems()); deleteSel(); return; }
+    if (mod && k === 'v' && state.clipboard) { e.preventDefault(); pasteItems(state.clipboard, GRID * 2); state.clipboard = clone(selItems()); return; }
+    if (mod && k === 'd' && state.sel.length) { e.preventDefault(); pasteItems(selItems(), GRID * 2); return; }
+    if ((k === 'delete' || k === 'backspace') && state.sel.length) { e.preventDefault(); deleteSel(); return; }
+    if (mod && k === 'g') { e.preventDefault(); if (e.shiftKey) ungroupSel(); else groupSel(); return; }
+    if (k === 'escape') {
+      if (state.inner) { const g = state.inner; state.inner = null; state.sel = page().items.filter((i) => i.group === g).map((i) => i.id); }
+      else state.sel = [];
+      selectionChanged();
+      return;
+    }
+    const step = e.shiftKey ? GRID : 1;
+    const arrows = { arrowleft: [-step, 0], arrowright: [step, 0], arrowup: [0, -step], arrowdown: [0, step] };
+    if (arrows[k] && state.sel.length) { e.preventDefault(); nudge(...arrows[k]); }
+  });
+
+  // ---------------------------------------------------------------- ボタン類
+  el.inspector.addEventListener('input', (e) => onInspectorInput(e, e.target.type === 'checkbox' || e.target.tagName === 'SELECT'));
+  el.inspector.addEventListener('change', (e) => onInspectorInput(e, true));
+  el.inspector.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.act === 'delete') deleteSel();
+    if (b.dataset.act === 'duplicate') pasteItems(selItems(), GRID * 2);
+    if (b.dataset.act === 'front') reorder(true);
+    if (b.dataset.act === 'back') reorder(false);
+    if (b.dataset.act === 'group') groupSel();
+    if (b.dataset.act === 'ungroup') ungroupSel();
+    if (b.dataset.align) align(b.dataset.align);
+    if (b.dataset.page === 'dup') addPage(page());
+    if (b.dataset.page === 'del') deletePage();
+    if (b.dataset.themeColor) setTheme(b.dataset.themeColor, true);
+    if (b.dataset.reset) {
+      const i = selItems()[0];
+      const def = i && UI.get(i.type);
+      const p = def && def.props.find((x) => x.key === b.dataset.reset);
+      if (p) { setProp(i, p.key, p.default || ''); commit(); renderInspector(); }
+    }
+  });
+
+  el.pages.addEventListener('click', (e) => {
+    const t = e.target.closest('.page-tab');
+    if (t) gotoPage(Number(t.dataset.index));
+  });
+  $('#btnAddPage').addEventListener('click', () => addPage(null));
+  $('#btnUndo').addEventListener('click', undo);
+  $('#btnRedo').addEventListener('click', redo);
+  $('#btnZoomIn').addEventListener('click', () => setZoom(state.zoom * 1.2));
+  $('#btnZoomOut').addEventListener('click', () => setZoom(state.zoom / 1.2));
+  $('#btnZoomFit').addEventListener('click', zoomFit);
+  $('#optSnap').addEventListener('change', (e) => { state.snap = e.target.checked; });
+  $('#optGrid').addEventListener('change', (e) => { state.grid = e.target.checked; el.screen.classList.toggle('show-grid', state.grid); });
+  $('#btnNew').addEventListener('click', () => {
+    if (!window.confirm('新しい資料を作ります。今の内容は消えます（必要なら先に「保存」してください）。')) return;
+    setDoc({ title: '新しい画面イメージ', size: state.doc.size, theme: state.doc.theme, pages: [{ name: '画面1', items: [] }] }, 0);
+  });
+  $('#btnOpen').addEventListener('click', () => $('#fileOpen').click());
+  $('#fileOpen').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) openJSON(f); e.target.value = ''; });
+  $('#btnSave').addEventListener('click', saveJSON);
+  $('#btnPng').addEventListener('click', exportPNG);
+  $('#btnCopyImg').addEventListener('click', copyImage);
+  $('#btnPptx').addEventListener('click', exportPPTX);
+  el.search.addEventListener('input', renderPalette);
+  el.title.addEventListener('input', () => { state.doc.title = el.title.value; });
+  el.title.addEventListener('change', () => { state.doc.title = el.title.value.trim() || '画面イメージ'; commit(); });
+  
+  // ---------------------------------------------------------------- 起動
+  const stored = loadStored();
+  renderPalette();
+  if (stored) setDoc(stored.doc, stored.page);
+  else setDoc(window.GamenSample(), 0);
+
+  // 拡張やテストから触れるように公開しておく
+  window.GamenEditor = { state, setDoc, exportPPTX, pageSVG, addItem, gotoPage, buildPptx: () => window.GamenPptx.build(state.doc) };
+})();
+
+</script>
+</body>
+</html>

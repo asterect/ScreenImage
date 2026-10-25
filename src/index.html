@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>画面イメージエディタ</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 8h19" stroke="currentColor" stroke-width="1.6"/><rect x="5.5" y="10.5" width="5" height="7" rx="1" fill="currentColor"/><path d="M13 11.5h6M13 14.5h6M13 17.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span>画面イメージエディタ</span>
+    </div>
+    <label class="doc-title"><span class="sr-only">資料名</span><input id="docTitle" type="text" spellcheck="false"></label>
+
+    <div class="toolgroup" role="group" aria-label="編集">
+      <button class="icon-btn" id="btnUndo" title="元に戻す（Ctrl+Z）" aria-label="元に戻す"><svg viewBox="0 0 20 20"><path d="M7 5 3 9l4 4M3.5 9H12a5 5 0 0 1 0 10h-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="icon-btn" id="btnRedo" title="やり直す（Ctrl+Y）" aria-label="やり直す"><svg viewBox="0 0 20 20"><path d="m13 5 4 4-4 4M16.5 9H8a5 5 0 0 0 0 10h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="toolgroup" role="group" aria-label="表示">
+      <button class="icon-btn" id="btnZoomOut" title="縮小" aria-label="縮小"><svg viewBox="0 0 20 20"><path d="M5 10h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="zoom-label" id="btnZoomFit" title="画面に合わせる">100%</button>
+      <button class="icon-btn" id="btnZoomIn" title="拡大" aria-label="拡大"><svg viewBox="0 0 20 20"><path d="M5 10h10M10 5v10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <label class="check" title="8px 単位で揃える（Alt を押しながら動かすと無効）"><input type="checkbox" id="optSnap" checked><span>グリッドに吸着</span></label>
+      <label class="check"><input type="checkbox" id="optGrid" checked><span>方眼</span></label>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="toolgroup files" role="group" aria-label="ファイル">
+      <button class="btn ghost" id="btnNew">新規</button>
+      <button class="btn ghost" id="btnOpen">開く</button>
+      <button class="btn ghost" id="btnSave" title="編集データを保存（Ctrl+S）">保存</button>
+      <input type="file" id="fileOpen" accept=".json,application/json" hidden>
+    </div>
+    <div class="toolgroup" role="group" aria-label="出力">
+      <button class="btn ghost" id="btnCopyImg" title="表示中のページを画像としてコピー（Excel にそのまま貼り付け可）">画像をコピー</button>
+      <button class="btn ghost" id="btnPng">PNG</button>
+      <button class="btn primary" id="btnPptx">PowerPoint 出力</button>
+    </div>
+  </header>
+
+  <aside class="palette" aria-label="部品">
+    <div class="pane-head">
+      <h2>部品</h2>
+      <input id="paletteSearch" type="search" placeholder="部品を探す" aria-label="部品を探す">
+    </div>
+    <div class="palette-body" id="palette"></div>
+    <p class="pane-foot">ドラッグして配置、またはクリックで中央に追加</p>
+  </aside>
+
+  <main class="workspace">
+    <div class="stage" id="stage" tabindex="-1">
+      <div class="screen-wrap" id="screenWrap">
+        <div class="screen" id="screen">
+          <div class="items" id="items"></div>
+          <div class="overlay" id="overlay"></div>
+        </div>
+      </div>
+    </div>
+    <nav class="pagebar" aria-label="ページ">
+      <div class="pages" id="pages" role="tablist"></div>
+      <button class="btn ghost small" id="btnAddPage">＋ ページ追加</button>
+      <span class="spacer"></span>
+      <span class="status" id="status"></span>
+    </nav>
+  </main>
+
+  <aside class="inspector" aria-label="プロパティ">
+    <div class="inspector-body" id="inspector"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<!-- 本体 -->
+<script src="core/registry.js"></script>
+<script src="core/render.js"></script>
+<script src="core/zip.js"></script>
+<script src="core/pptx-template.js"></script>
+<script src="core/pptx.js"></script>
+
+<!-- 部品（増やすときはここに1行追加） -->
+<script src="components/_shared.js"></script>
+<script src="components/layout.js"></script>
+<script src="components/input.js"></script>
+<script src="components/display.js"></script>
+<script src="components/annotation.js"></script>
+<script src="components/steps.js"></script>
+
+<!-- 画面 -->
+<script src="core/sample.js"></script>
+<script src="core/editor.js"></script>
+</body>
+</html>
